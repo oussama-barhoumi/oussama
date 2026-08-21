@@ -1,6 +1,5 @@
 import { useRef, useState, useCallback, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import BMO from '../3d/BMO'
 
@@ -16,7 +15,7 @@ export default function Hero() {
   }, [])
 
   const handleAssemblyComplete = useCallback(() => {
-    // hook for future use (e.g. reveal text, enable scroll)
+    // Assembly & eye-lock sequence complete
   }, [])
 
   return (
@@ -28,7 +27,7 @@ export default function Hero() {
         width: '100%',
         height: '100vh',
         overflow: 'hidden',
-        background: '#0a0a0a',
+        background: '#070707',
       }}
     >
       <Canvas
@@ -42,43 +41,44 @@ export default function Hero() {
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.0,
+          toneMappingExposure: 0.95,
           outputColorSpace: THREE.SRGBColorSpace,
         }}
         style={{ position: 'absolute', inset: 0 }}
       >
-        {/* Cinematic lighting */}
-        <ambientLight intensity={0.3} color="#f5e6d3" />
+        {/* Subtle dark ambient light */}
+        <ambientLight intensity={0.25} color="#e6dfd5" />
 
-        {/* Key light — warm, from upper-right */}
+        {/* Dramatic key light — warm highlight from top-right */}
         <directionalLight
-          position={[4, 5, 3]}
-          intensity={1.2}
-          color="#ffe8d0"
+          position={[4, 6, 3]}
+          intensity={1.3}
+          color="#ffefe0"
           castShadow={false}
         />
 
-        {/* Rim light — cool accent, from behind-left */}
+        {/* Crisp rim light — cold metallic accent from behind-left */}
         <directionalLight
-          position={[-3, 2, -4]}
-          intensity={0.6}
-          color="#c8d8e8"
+          position={[-4, 3, -4]}
+          intensity={0.8}
+          color="#b0cced"
         />
 
-        {/* Fill light — subtle, from below */}
+        {/* Low shadow fill — subtle ambient reflection from below */}
         <directionalLight
-          position={[0, -3, 2]}
-          intensity={0.25}
-          color="#e8ddd0"
+          position={[0, -4, 2]}
+          intensity={0.2}
+          color="#dfd6cd"
         />
 
-        {/* Subtle point light to bring out face details */}
-        <pointLight
-          position={[0, 0.5, 3]}
-          intensity={0.4}
-          color="#fff5eb"
-          distance={8}
-          decay={2}
+        {/* Piercing spotlight focusing directly on the character center */}
+        <spotLight
+          position={[0, 4, 4]}
+          target-position={[0, 0, 0]}
+          intensity={0.7}
+          angle={0.4}
+          penumbra={0.8}
+          color="#fff8f0"
         />
 
         <Suspense fallback={null}>
@@ -89,14 +89,14 @@ export default function Hero() {
         </Suspense>
       </Canvas>
 
-      {/* Subtle vignette overlay */}
+      {/* Deep cinematic vignette overlay */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
           pointerEvents: 'none',
           background:
-            'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)',
+            'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.65) 100%)',
         }}
       />
     </section>
