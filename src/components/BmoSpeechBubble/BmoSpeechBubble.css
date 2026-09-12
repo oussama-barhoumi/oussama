@@ -33,25 +33,25 @@
 .bmo-paper-card {
   position: relative;
   width: auto;
-  max-width: 420px;
-  min-width: 240px;
+  max-width: 480px;
+  min-width: 260px;
   background-color: transparent;
-  filter: drop-shadow(0 12px 24px rgba(50, 35, 18, 0.13))
-          drop-shadow(0 4px 8px rgba(50, 35, 18, 0.06));
+  filter: drop-shadow(0 14px 28px rgba(50, 35, 18, 0.14))
+          drop-shadow(0 4px 10px rgba(50, 35, 18, 0.07));
   transition: max-width 0.3s ease;
 }
 
 @media (max-width: 1023px) {
   .bmo-paper-card {
-    max-width: 360px;
-    min-width: 200px;
+    max-width: 400px;
+    min-width: 220px;
   }
 }
 
 @media (max-width: 639px) {
   .bmo-paper-card {
-    max-width: min(92vw, 360px);
-    min-width: 180px;
+    max-width: min(92vw, 380px);
+    min-width: 200px;
   }
 }
 
@@ -79,7 +79,7 @@
 .bmo-paper-noise-overlay {
   position: absolute;
   inset: 0;
-  border-radius: 12px;
+  border-radius: 16px;
   opacity: 0.04;
   pointer-events: none;
   background-image: radial-gradient(#2B2620 1px, transparent 1px);
@@ -87,28 +87,35 @@
   mix-blend-mode: multiply;
 }
 
-/* Text Content Area */
+/* Text Content Area with Generous Padding & Margin */
 .bmo-bubble-content-wrap {
   position: relative;
   z-index: 10;
-  padding: 22px 28px;
-  min-height: 80px;
+  padding: 30px 42px 34px 42px;
+  min-height: 96px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
+@media (max-width: 1023px) {
+  .bmo-bubble-content-wrap {
+    padding: 24px 34px 28px 34px;
+    min-height: 84px;
+  }
+}
+
 @media (max-width: 639px) {
   .bmo-bubble-content-wrap {
-    padding: 16px 20px;
-    min-height: 64px;
+    padding: 20px 28px 24px 28px;
+    min-height: 72px;
   }
 }
 
 .bmo-bubble-text {
   font-size: 26px;
-  line-height: 1.35;
-  letter-spacing: 0.01em;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
   word-break: break-word;
   color: #2B2620;
   margin: 0;
@@ -132,18 +139,18 @@
 .bmo-word-span {
   display: inline-block;
   white-space: pre;
-  margin-right: 0.22em;
+  margin-right: 0.24em;
   will-change: clip-path, transform, opacity;
   transform-origin: center bottom;
 }
 
 /* Special "Ready?" Panel Treatment */
 .bmo-bubble-ready .bmo-paper-card {
-  max-width: 440px;
+  max-width: 500px;
 }
 
 .bmo-bubble-ready .bmo-bubble-content-wrap {
-  padding: 36px 48px;
+  padding: 42px 56px 46px 56px;
   text-align: center;
   align-items: center;
 }
@@ -151,13 +158,14 @@
 .bmo-bubble-ready .bmo-bubble-text {
   font-size: 38px;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: #211D18;
 }
 
 @media (max-width: 639px) {
   .bmo-bubble-ready .bmo-bubble-text {
     font-size: 28px;
+    padding: 32px 40px;
   }
 }
 
@@ -180,14 +188,14 @@
 }
 
 .bmo-intensity-high .bmo-paper-card {
-  filter: drop-shadow(0 16px 32px rgba(50, 35, 18, 0.18))
-          drop-shadow(0 6px 12px rgba(50, 35, 18, 0.08));
+  filter: drop-shadow(0 18px 36px rgba(50, 35, 18, 0.18))
+          drop-shadow(0 6px 14px rgba(50, 35, 18, 0.09));
 }
 
 /* Manga Doodles Placement */
 .bmo-doodle-container {
   position: absolute;
-  inset: -16px;
+  inset: -20px;
   pointer-events: none;
   z-index: 20;
 }
@@ -199,23 +207,29 @@
 }
 
 .bmo-doodle-pos-top-right {
-  top: -14px;
-  right: -10px;
+  top: -16px;
+  right: -12px;
 }
 
 .bmo-doodle-pos-top-left {
-  top: -14px;
-  left: -10px;
+  top: -16px;
+  left: -12px;
 }
 
 .bmo-doodle-pos-bottom-right {
-  bottom: -10px;
-  right: 8px;
+  bottom: -12px;
+  right: 12px;
 }
 
 .bmo-doodle-pos-bottom-left {
+  bottom: -12px;
+  left: 12px;
+}
+
+.bmo-doodle-pos-bottom-center {
   bottom: -10px;
-  left: 8px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 /* Minimal Variant */
@@ -225,18 +239,6 @@
 
 .bmo-variant-minimal .bmo-paper-card {
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
-}
-
-/* Ink Dot Reveal Marker */
-.bmo-ink-dot {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  background-color: #2B2620;
-  border-radius: 50%;
-  transform: scale(0);
-  pointer-events: none;
-  z-index: 25;
 }
 
 /* Accessible Screen Reader Text */

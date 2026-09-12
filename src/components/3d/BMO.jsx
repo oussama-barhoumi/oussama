@@ -155,6 +155,7 @@ const CATEGORY_TIMING = {
 export default function BMO({
   mousePosition = { x: 0, y: 0 },
   onAssemblyComplete,
+  videoRef: externalVideoRef,
 }) {
   const REST_Y = -2.8
 
@@ -184,7 +185,8 @@ export default function BMO({
   // VIDEO REFS
   // ============================================================
 
-  const videoRef = useRef(null)
+  const internalVideoRef = useRef(null)
+  const videoRef = externalVideoRef || internalVideoRef
   const videoTextureRef = useRef(null)
 
   const { viewport, camera, gl } = useThree()

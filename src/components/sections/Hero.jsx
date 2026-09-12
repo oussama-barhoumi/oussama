@@ -1,22 +1,13 @@
-import { useRef, useState, useCallback, useEffect, Suspense } from 'react'
+import { useRef, useState, useCallback, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
 import BMO from '../3d/BMO'
-import { BmoSpeechBubble } from '../BmoSpeechBubble'
-
-const DIALOGUE_LINES = [
-  { text: "Hey! I'm BMO!", intensity: "high", position: "right" },
-  { text: "Welcome to my portfolio!", intensity: "medium", position: "right" },
-  { text: "I build cool 3D web experiences.", intensity: "medium", position: "right" },
-  { text: "Ready?", intensity: "high", position: "right" },
-  { text: "Let's go!", intensity: "high", position: "right" },
-]
+import { BmoSpeechBubble, DEFAULT_DIALOGUE_LINES } from '../BmoSpeechBubble'
 
 export default function Hero() {
   const containerRef = useRef()
+  const videoRef = useRef(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [lineIndex, setLineIndex] = useState(0)
-  const [isSpeaking, setIsSpeaking] = useState(true)
 
   const handleMouseMove = useCallback((e) => {
     // Normalise mouse to -1…1 range
@@ -26,20 +17,8 @@ export default function Hero() {
   }, [])
 
   const handleAssemblyComplete = useCallback(() => {
-    // Assembly & eye-lock sequence complete
-    setIsSpeaking(true)
+    // Assembly complete
   }, [])
-
-  // Auto-advance dialogue lines every 4.5 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setLineIndex((prev) => (prev + 1) % DIALOGUE_LINES.length)
-      setIsSpeaking(true)
-    }, 4500)
-    return () => clearInterval(timer)
-  }, [])
-
-  const currentDialogue = DIALOGUE_LINES[lineIndex]
 
   return (
     <section
@@ -106,33 +85,30 @@ export default function Hero() {
 
         <Suspense fallback={null}>
           <BMO
+            videoRef={videoRef}
             mousePosition={mousePosition}
             onAssemblyComplete={handleAssemblyComplete}
           />
         </Suspense>
       </Canvas>
 
-      {/* BMO Manga Speech Bubble UI Overlay */}
+      {/* Video-Synchronized BMO Manga Speech Bubble Overlay */}
       <div
-        onClick={() => {
-          setLineIndex((prev) => (prev + 1) % DIALOGUE_LINES.length)
-          setIsSpeaking(true)
-        }}
         className="bmo-bubble-overlay"
         style={{
           position: 'absolute',
           top: '20%',
           left: 'calc(50% + 120px)',
           zIndex: 40,
-          cursor: 'pointer',
         }}
       >
         <BmoSpeechBubble
-          text={currentDialogue.text}
-          isSpeaking={isSpeaking}
-          position={currentDialogue.position}
+          videoRef={videoRef}
+          lines={DEFAULT_DIALOGUE_LINES}
+          enabled={true}
+          position="right"
           variant="manga"
-          intensity={currentDialogue.intensity}
+          intensity="medium"
           showDoodles={true}
         />
       </div>

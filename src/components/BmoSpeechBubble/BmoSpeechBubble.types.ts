@@ -1,20 +1,50 @@
+import React from 'react';
+
 export type SpeechBubblePosition = 'left' | 'right' | 'top' | 'bottom';
 export type SpeechBubbleVariant = 'manga' | 'minimal';
 export type SpeechBubbleIntensity = 'low' | 'medium' | 'high';
 
-export interface BmoSpeechBubbleProps {
-  /** The text dialogue string spoken by BMO */
+export type DoodleType =
+  | 'star-burst'
+  | 'excitement-mark'
+  | 'confused-scribble'
+  | 'path-arrow'
+  | 'rough-circle'
+  | 'label-tags'
+  | 'off-page-arrow'
+  | 'empty-emphasis'
+  | 'speed-lines';
+
+export interface WordTiming {
+  word: string;
+  start: number; // seconds from video start
+  end: number;   // seconds from video start
+}
+
+export interface DialogueLine {
+  id: string;
   text: string;
-  /** Whether BMO is actively speaking */
-  isSpeaking: boolean;
-  /** Position of the bubble relative to BMO's head/mouth. Controls tail orientation. Default: 'right' */
+  start: number; // seconds from video start
+  end: number;   // seconds from video start
+  words?: WordTiming[];
+  doodle?: DoodleType;
+}
+
+export interface BmoSpeechBubbleProps {
+  /** Ref to the HTMLVideoElement serving as master clock */
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+  /** Array of video-synchronized dialogue lines */
+  lines: DialogueLine[];
+  /** Master toggle to enable/disable dialogue speech bubble. Default: true */
+  enabled?: boolean;
+  /** Position of bubble relative to BMO. Default: 'right' */
   position?: SpeechBubblePosition;
-  /** Visual theme variant: 'manga' (hand-drawn paper + ink) or 'minimal' (clean editorial). Default: 'manga' */
+  /** Visual variant. Default: 'manga' */
   variant?: SpeechBubbleVariant;
-  /** Motion and doodle reaction intensity: 'low' | 'medium' | 'high'. Default: 'medium' */
+  /** Motion intensity. Default: 'medium' */
   intensity?: SpeechBubbleIntensity;
-  /** Whether to render SVG manga reaction doodles. Default: true */
+  /** Whether to show manga doodles. Default: true */
   showDoodles?: boolean;
-  /** Extra CSS classes applied to the outer wrapper */
+  /** Additional CSS class names */
   className?: string;
 }
