@@ -1,0 +1,264 @@
+/* ─── BmoSpeechBubble Component Styles ─────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Klee+One:wght@400;600&family=Yomogi&display=swap');
+
+.bmo-speech-bubble-root {
+  position: relative;
+  display: inline-block;
+  font-family: 'Klee One', 'Yomogi', 'Caveat', cursive, sans-serif;
+  color: #2B2620;
+  pointer-events: auto;
+  z-index: 50;
+  user-select: none;
+}
+
+/* Positioning Offsets */
+.bmo-bubble-pos-right {
+  transform-origin: bottom left;
+}
+
+.bmo-bubble-pos-left {
+  transform-origin: bottom right;
+}
+
+.bmo-bubble-pos-top {
+  transform-origin: bottom center;
+}
+
+.bmo-bubble-pos-bottom {
+  transform-origin: top center;
+}
+
+/* Paper Container */
+.bmo-paper-card {
+  position: relative;
+  width: auto;
+  max-width: 420px;
+  min-width: 240px;
+  background-color: transparent;
+  filter: drop-shadow(0 12px 24px rgba(50, 35, 18, 0.13))
+          drop-shadow(0 4px 8px rgba(50, 35, 18, 0.06));
+  transition: max-width 0.3s ease;
+}
+
+@media (max-width: 1023px) {
+  .bmo-paper-card {
+    max-width: 360px;
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 639px) {
+  .bmo-paper-card {
+    max-width: min(92vw, 360px);
+    min-width: 180px;
+  }
+}
+
+/* SVG Background Frame & Tail */
+.bmo-bubble-svg-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.bmo-paper-path {
+  fill: #F7F3EA;
+  stroke: #2B2620;
+  stroke-width: 1.8px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Paper Grain Texture Overlay */
+.bmo-paper-noise-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  opacity: 0.04;
+  pointer-events: none;
+  background-image: radial-gradient(#2B2620 1px, transparent 1px);
+  background-size: 4px 4px;
+  mix-blend-mode: multiply;
+}
+
+/* Text Content Area */
+.bmo-bubble-content-wrap {
+  position: relative;
+  z-index: 10;
+  padding: 22px 28px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (max-width: 639px) {
+  .bmo-bubble-content-wrap {
+    padding: 16px 20px;
+    min-height: 64px;
+  }
+}
+
+.bmo-bubble-text {
+  font-size: 26px;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  word-break: break-word;
+  color: #2B2620;
+  margin: 0;
+  position: relative;
+  will-change: transform, opacity;
+}
+
+@media (max-width: 1023px) {
+  .bmo-bubble-text {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 639px) {
+  .bmo-bubble-text {
+    font-size: 19px;
+  }
+}
+
+/* Individual Words for Organic Rotation & Reveal */
+.bmo-word-span {
+  display: inline-block;
+  white-space: pre;
+  margin-right: 0.22em;
+  will-change: clip-path, transform, opacity;
+  transform-origin: center bottom;
+}
+
+/* Special "Ready?" Panel Treatment */
+.bmo-bubble-ready .bmo-paper-card {
+  max-width: 440px;
+}
+
+.bmo-bubble-ready .bmo-bubble-content-wrap {
+  padding: 36px 48px;
+  text-align: center;
+  align-items: center;
+}
+
+.bmo-bubble-ready .bmo-bubble-text {
+  font-size: 38px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #211D18;
+}
+
+@media (max-width: 639px) {
+  .bmo-bubble-ready .bmo-bubble-text {
+    font-size: 28px;
+  }
+}
+
+/* Special "Let's go!" Treatment */
+.bmo-bubble-letsgo .bmo-bubble-text {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 639px) {
+  .bmo-bubble-letsgo .bmo-bubble-text {
+    font-size: 24px;
+  }
+}
+
+/* Intensity Modifiers */
+.bmo-intensity-low .bmo-bubble-text {
+  font-weight: 400;
+}
+
+.bmo-intensity-high .bmo-paper-card {
+  filter: drop-shadow(0 16px 32px rgba(50, 35, 18, 0.18))
+          drop-shadow(0 6px 12px rgba(50, 35, 18, 0.08));
+}
+
+/* Manga Doodles Placement */
+.bmo-doodle-container {
+  position: absolute;
+  inset: -16px;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.bmo-manga-doodle {
+  position: absolute;
+  overflow: visible;
+  filter: drop-shadow(0 2px 4px rgba(43, 38, 32, 0.1));
+}
+
+.bmo-doodle-pos-top-right {
+  top: -14px;
+  right: -10px;
+}
+
+.bmo-doodle-pos-top-left {
+  top: -14px;
+  left: -10px;
+}
+
+.bmo-doodle-pos-bottom-right {
+  bottom: -10px;
+  right: 8px;
+}
+
+.bmo-doodle-pos-bottom-left {
+  bottom: -10px;
+  left: 8px;
+}
+
+/* Minimal Variant */
+.bmo-variant-minimal .bmo-paper-path {
+  stroke-width: 1px;
+}
+
+.bmo-variant-minimal .bmo-paper-card {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+}
+
+/* Ink Dot Reveal Marker */
+.bmo-ink-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background-color: #2B2620;
+  border-radius: 50%;
+  transform: scale(0);
+  pointer-events: none;
+  z-index: 25;
+}
+
+/* Accessible Screen Reader Text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .bmo-paper-card,
+  .bmo-bubble-text,
+  .bmo-word-span,
+  .bmo-manga-doodle {
+    animation: none !important;
+    transition: none !important;
+  }
+}

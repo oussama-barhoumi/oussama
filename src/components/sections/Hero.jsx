@@ -1,11 +1,22 @@
-import { useRef, useState, useCallback, Suspense } from 'react'
+import { useRef, useState, useCallback, useEffect, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
 import BMO from '../3d/BMO'
+import { BmoSpeechBubble } from '../BmoSpeechBubble'
+
+const DIALOGUE_LINES = [
+  { text: "Hey! I'm BMO!", intensity: "high", position: "right" },
+  { text: "Welcome to my portfolio!", intensity: "medium", position: "right" },
+  { text: "I build cool 3D web experiences.", intensity: "medium", position: "right" },
+  { text: "Ready?", intensity: "high", position: "right" },
+  { text: "Let's go!", intensity: "high", position: "right" },
+]
 
 export default function Hero() {
   const containerRef = useRef()
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [lineIndex, setLineIndex] = useState(0)
+  const [isSpeaking, setIsSpeaking] = useState(true)
 
   const handleMouseMove = useCallback((e) => {
     // Normalise mouse to -1…1 range
@@ -16,7 +27,19 @@ export default function Hero() {
 
   const handleAssemblyComplete = useCallback(() => {
     // Assembly & eye-lock sequence complete
+    setIsSpeaking(true)
   }, [])
+
+  // Auto-advance dialogue lines every 4.5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLineIndex((prev) => (prev + 1) % DIALOGUE_LINES.length)
+      setIsSpeaking(true)
+    }, 4500)
+    return () => clearInterval(timer)
+  }, [])
+
+  const currentDialogue = DIALOGUE_LINES[lineIndex]
 
   return (
     <section
@@ -88,6 +111,42 @@ export default function Hero() {
           />
         </Suspense>
       </Canvas>
+
+      {/* BMO Manga Speech Bubble UI Overlay */}
+      <div
+        onClick={() => {
+          setLineIndex((prev) => (prev + 1) % DIALOGUE_LINES.length)
+          setIsSpeaking(true)
+        }}
+        className="bmo-bubble-overlay"
+        style={{
+          position: 'absolute',
+          top: '20%',
+          left: 'calc(50% + 120px)',
+          zIndex: 40,
+          cursor: 'pointer',
+        }}
+      >
+        <BmoSpeechBubble
+          text={currentDialogue.text}
+          isSpeaking={isSpeaking}
+          position={currentDialogue.position}
+          variant="manga"
+          intensity={currentDialogue.intensity}
+          showDoodles={true}
+        />
+      </div>
+
+      {/* Responsive stylesheet for overlay placement */}
+      <style>{`
+        @media (max-width: 768px) {
+          .bmo-bubble-overlay {
+            top: 14% !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+          }
+        }
+      `}</style>
 
       {/* Deep cinematic vignette overlay */}
       <div
