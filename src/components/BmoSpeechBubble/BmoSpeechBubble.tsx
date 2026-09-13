@@ -94,55 +94,143 @@ export const BmoSpeechBubble: React.FC<BmoSpeechBubbleProps> = ({
   intensity = 'medium',
   showDoodles = true,
   className = '',
+  step,
 }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const paperRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
 
-  // Initial active line defaults to first line so bubble is ready on load
-  const [activeLine, setActiveLine] = useState<DialogueLine | null>(lines[0] || null);
+  // Initial active line is null so bubble does NOT show before video starts
+  const [activeLine, setActiveLine] = useState<DialogueLine | null>(null);
   const [isDoodleActive, setIsDoodleActive] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
+  const [isGlitching, setIsGlitching] = useState<boolean>(false);
+  const [isGlitchDone, setIsGlitchDone] = useState<boolean>(false);
 
   // Cached DOM references & active line ID to prevent 60fps React re-renders
-  const activeLineIdRef = useRef<string | null>(lines[0]?.id || null);
+  const activeLineIdRef = useRef<string | null>(null);
+  const hasStartedRef = useRef<boolean>(false);
+  const isGlitchingRef = useRef<boolean>(false);
+  const isGlitchDoneRef = useRef<boolean>(false);
+  const lastActiveLineRef = useRef<DialogueLine | null>(null);
+
   const wordDomElsRef = useRef<{ el: HTMLSpanElement; timing?: WordTiming; lineStart: number; lineEnd: number }[]>([]);
   const breathingTweenRef = useRef<gsap.core.Tween | null>(null);
 
+  const currentDisplayLine = activeLine || (isGlitching ? lastActiveLineRef.current : null);
+
+  // Trigger cyber/manga glitch disappearance
+  const triggerGlitchExit = useCallback(() => {
+    if (!hasStartedRef.current || isGlitchingRef.current || isGlitchDoneRef.current) return;
+    isGlitchingRef.current = true;
+    setIsGlitching(true);
+
+    setTimeout(() => {
+      isGlitchDoneRef.current = true;
+      setIsGlitchDone(true);
+      setIsGlitching(false);
+      setActiveLine(null);
+      activeLineIdRef.current = null;
+    }, 480);
+  }, []);
+
+  // Sync with optional step prop from Hero
+  useEffect(() => {
+    if (step === 'playing') {
+      hasStartedRef.current = true;
+      isGlitchingRef.current = false;
+      isGlitchDoneRef.current = false;
+      setHasStarted(true);
+      setIsGlitching(false);
+      setIsGlitchDone(false);
+    } else if (
+      (step === 'ended' || step === 'transitioning') &&
+      hasStartedRef.current &&
+      !isGlitchDoneRef.current &&
+      !isGlitchingRef.current
+    ) {
+      triggerGlitchExit();
+    }
+  }, [step, triggerGlitchExit]);
+
+  // Track video element events directly
+  useEffect(() => {
+    let attachedVideo: HTMLVideoElement | null = null;
+
+    const onPlay = () => {
+      hasStartedRef.current = true;
+      isGlitchingRef.current = false;
+      isGlitchDoneRef.current = false;
+      setHasStarted(true);
+      setIsGlitching(false);
+      setIsGlitchDone(false);
+    };
+
+    const onEnded = () => {
+      triggerGlitchExit();
+    };
+
+    const attach = (video: HTMLVideoElement) => {
+      if (!video || attachedVideo === video) return;
+      attachedVideo = video;
+      video.addEventListener('play', onPlay);
+      video.addEventListener('ended', onEnded);
+    };
+
+    const intervalId = setInterval(() => {
+      if (videoRef?.current && videoRef.current !== attachedVideo) {
+        attach(videoRef.current);
+      }
+    }, 100);
+
+    if (videoRef?.current) {
+      attach(videoRef.current);
+    }
+
+    return () => {
+      clearInterval(intervalId);
+      if (attachedVideo) {
+        attachedVideo.removeEventListener('play', onPlay);
+        attachedVideo.removeEventListener('ended', onEnded);
+      }
+    };
+  }, [videoRef, triggerGlitchExit]);
+
   // Parse current text properties
-  const lowerText = useMemo(() => (activeLine ? activeLine.text.trim().toLowerCase() : ''), [activeLine]);
+  const lowerText = useMemo(() => (currentDisplayLine ? currentDisplayLine.text.trim().toLowerCase() : ''), [currentDisplayLine]);
   const isReadyText = useMemo(() => lowerText.includes('ready'), [lowerText]);
   const isLetsGoText = useMemo(() => lowerText.includes("let's go") || lowerText.includes('lets go'), [lowerText]);
 
   // Tokenize text into words / timings
   const wordTokens = useMemo(() => {
-    if (!activeLine) return [];
-    if (activeLine.words && activeLine.words.length > 0) {
-      return activeLine.words;
+    if (!currentDisplayLine) return [];
+    if (currentDisplayLine.words && currentDisplayLine.words.length > 0) {
+      return currentDisplayLine.words;
     }
     // Fallback: split text evenly across start -> end
-    const splitWords = activeLine.text.split(/\s+/).filter(Boolean);
-    const lineDuration = activeLine.end - activeLine.start;
+    const splitWords = currentDisplayLine.text.split(/\s+/).filter(Boolean);
+    const lineDuration = currentDisplayLine.end - currentDisplayLine.start;
     const wordDur = lineDuration / Math.max(1, splitWords.length);
 
     return splitWords.map((word, idx) => ({
       word,
-      start: activeLine.start + idx * wordDur,
-      end: activeLine.start + (idx + 1) * wordDur,
+      start: currentDisplayLine.start + idx * wordDur,
+      end: currentDisplayLine.start + (idx + 1) * wordDur,
     }));
-  }, [activeLine]);
+  }, [currentDisplayLine]);
 
   // Callback ref for mounting word span elements
   const registerWordEl = useCallback((el: HTMLSpanElement | null, idx: number) => {
-    if (!el || !activeLine) return;
+    if (!el || !currentDisplayLine) return;
     const timing = wordTokens[idx];
     wordDomElsRef.current[idx] = {
       el,
       timing,
-      lineStart: activeLine.start,
-      lineEnd: activeLine.end,
+      lineStart: currentDisplayLine.start,
+      lineEnd: currentDisplayLine.end,
     };
-  }, [activeLine, wordTokens]);
+  }, [currentDisplayLine, wordTokens]);
 
   // Line transition & paper entrance micro-nudge
   useEffect(() => {
@@ -204,12 +292,46 @@ export const BmoSpeechBubble: React.FC<BmoSpeechBubbleProps> = ({
 
       setIsSpeaking(isPlaying);
 
-      // Determine active line from video.currentTime
-      const currentLine =
-        lines.find((l) => time >= l.start && time < l.end) ||
-        (time <= (lines[0]?.start ?? 0) ? lines[0] : null);
+      if (isPlaying && !hasStartedRef.current) {
+        hasStartedRef.current = true;
+        isGlitchingRef.current = false;
+        isGlitchDoneRef.current = false;
+        setHasStarted(true);
+        setIsGlitching(false);
+        setIsGlitchDone(false);
+      }
 
+      // If video has not started or glitch is done, no active line
+      if (!hasStartedRef.current || isGlitchDoneRef.current) {
+        if (activeLineIdRef.current !== null) {
+          activeLineIdRef.current = null;
+          setActiveLine(null);
+        }
+        animFrameId = requestAnimationFrame(tick);
+        return;
+      }
+
+      // Check if video reached the end of all dialogue
+      const lastLine = lines[lines.length - 1];
+      const isVideoAtEnd = !!video && (video.ended || (lastLine && time >= lastLine.end));
+      if (isVideoAtEnd && !isGlitchingRef.current && !isGlitchDoneRef.current) {
+        triggerGlitchExit();
+        animFrameId = requestAnimationFrame(tick);
+        return;
+      }
+
+      if (isGlitchingRef.current) {
+        animFrameId = requestAnimationFrame(tick);
+        return;
+      }
+
+      // Determine active line from video.currentTime
+      const currentLine = lines.find((l) => time >= l.start && time < l.end) || null;
       const currentLineId = currentLine ? currentLine.id : null;
+
+      if (currentLine) {
+        lastActiveLineRef.current = currentLine;
+      }
 
       // Update React state ONLY when active line changes!
       if (activeLineIdRef.current !== currentLineId) {
@@ -256,7 +378,7 @@ export const BmoSpeechBubble: React.FC<BmoSpeechBubbleProps> = ({
 
     animFrameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animFrameId);
-  }, [videoRef, lines, enabled]);
+  }, [videoRef, lines, enabled, triggerGlitchExit]);
 
   // Clean up GSAP on unmount
   useEffect(() => {
@@ -267,7 +389,7 @@ export const BmoSpeechBubble: React.FC<BmoSpeechBubbleProps> = ({
 
   const svgBubblePath = useMemo(() => getSvgPathForPosition(position), [position]);
 
-  if (!enabled || !activeLine) {
+  if (!enabled || !hasStarted || isGlitchDone || (!currentDisplayLine && !isGlitching)) {
     return (
       <div className="bmo-speech-bubble-root bmo-bubble-hidden" style={{ opacity: 0, pointerEvents: 'none' }}>
         <div aria-live="polite" className="sr-only" />
@@ -280,6 +402,7 @@ export const BmoSpeechBubble: React.FC<BmoSpeechBubbleProps> = ({
     `bmo-bubble-pos-${position}`,
     `bmo-variant-${variant}`,
     `bmo-intensity-${intensity}`,
+    isGlitching ? 'bmo-bubble-glitching' : '',
     isReadyText ? 'bmo-bubble-ready' : '',
     isLetsGoText ? 'bmo-bubble-letsgo' : '',
     className,
@@ -291,10 +414,10 @@ export const BmoSpeechBubble: React.FC<BmoSpeechBubbleProps> = ({
     <div ref={rootRef} className={rootClasses}>
       {/* Accessible Screen Reader Announcement */}
       <div aria-live="polite" className="sr-only">
-        {activeLine.text}
+        {currentDisplayLine?.text}
       </div>
 
-      {/* Visual Speech Bubble (Hidden from screen readers to prevent duplicate speech) */}
+      {/* Visual Speech Bubble */}
       <div ref={paperRef} className="bmo-paper-card" aria-hidden="true">
         {/* SVG Paper Background & Integrated Speech Tail */}
         <svg
@@ -333,10 +456,10 @@ export const BmoSpeechBubble: React.FC<BmoSpeechBubbleProps> = ({
         </div>
 
         {/* Dynamic Manga Doodle */}
-        {showDoodles && activeLine.doodle && (
+        {showDoodles && currentDisplayLine?.doodle && (
           <div className="bmo-doodle-container">
             <DoodleRenderer
-              doodle={activeLine.doodle}
+              doodle={currentDisplayLine.doodle}
               isActive={isDoodleActive}
               intensity={intensity}
             />

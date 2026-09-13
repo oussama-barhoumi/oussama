@@ -47,4 +47,6 @@ export interface BmoSpeechBubbleProps {
   showDoodles?: boolean;
   /** Additional CSS class names */
   className?: string;
+  /** Current interaction step (e.g. 'initial' | 'playing' | 'ended' | 'transitioning') */
+  step?: string;
 }

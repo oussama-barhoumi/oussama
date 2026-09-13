@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, Suspense } from 'react'
+import { useRef, useState, useEffect, useCallback, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
 import BMO from '../3d/BMO'
@@ -7,14 +7,16 @@ import { BmoSpeechBubble, DEFAULT_DIALOGUE_LINES } from '../BmoSpeechBubble'
 import { useBmoTransition } from '../../hooks/useBmoTransition'
 import BmoTransitionInner from '../transition/BmoTransitionInner'
 import BmoTransitionOverlay from '../transition/BmoTransitionOverlay'
+import BmoInteractionHint from '../transition/BmoInteractionHint'
 
 export default function Hero() {
   const containerRef = useRef()
   const videoRef = useRef(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isAssembled, setIsAssembled] = useState(false)
 
   // ── BMO → Home transition ──────────────────────────────────────────────────
-  const { triggerRef, overlayActive, overlayVisible } = useBmoTransition(videoRef)
+  const { triggerRef, fireTransition, overlayActive, overlayVisible, step, setStep } = useBmoTransition()
   // ──────────────────────────────────────────────────────────────────────────
 
   const handleMouseMove = useCallback((e) => {
@@ -25,7 +27,13 @@ export default function Hero() {
   }, [])
 
   const handleAssemblyComplete = useCallback(() => {
-    // Assembly complete
+    setIsAssembled(true)
+  }, [])
+
+  useEffect(() => {
+    // Fallback: reveal hint smoothly even if assembly event timing varies
+    const timer = setTimeout(() => setIsAssembled(true), 2500)
+    return () => clearTimeout(timer)
   }, [])
 
   return (
@@ -100,7 +108,12 @@ export default function Hero() {
         </Suspense>
 
         {/* BMO → Home transition — isolated, safe to remove */}
-        <BmoTransitionInner triggerRef={triggerRef} />
+        <BmoTransitionInner
+          triggerRef={triggerRef}
+          fireTransition={fireTransition}
+          videoRef={videoRef}
+          setStep={setStep}
+        />
       </Canvas>
 
       {/* Video-Synchronized BMO Manga Speech Bubble Overlay */}
@@ -121,6 +134,7 @@ export default function Hero() {
           variant="manga"
           intensity="medium"
           showDoodles={true}
+          step={step}
         />
       </div>
 
@@ -145,6 +159,9 @@ export default function Hero() {
             'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.65) 100%)',
         }}
       />
+
+      {/* Bottom hint banner: guides the user to press the red button */}
+      <BmoInteractionHint step={step} isAssembled={isAssembled} />
 
       {/* BMO → Home transition overlay — isolated, safe to remove */}
       <BmoTransitionOverlay active={overlayActive} visible={overlayVisible} />

@@ -3,9 +3,9 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * Orchestrates the BMO → Home cinematic transition.
  *
- * Because the video element inside videoRef.current is created asynchronously
- * by BMO's useEffect (after this hook mounts), we poll until the video element
- * appears and then attach the 'ended' listener.
+ * TRIGGER: The transition is now fired manually by BmoTransitionInner when
+ * the user clicks the red button for the SECOND time. The video-ended
+ * auto-trigger has been removed.
  *
  * ⚠️  ISOLATED — remove this file + BmoTransitionInner + BmoTransitionOverlay
  *     to fully revert without touching any existing BMO code.
@@ -14,8 +14,8 @@
  * TUNEABLE VALUES — all collected here for easy adjustment
  */
 export const TRANSITION_CONFIG = {
-  /** Seconds to wait after video "ended" before push-in starts */
-  cinematicPause: 0.9,
+  /** Seconds to wait after the 2nd red-button click before push-in starts */
+  cinematicPause: 0.4,
 
   /** GSAP duration for the push-in move (seconds) */
   pushInDuration: 2.4,
@@ -50,32 +50,41 @@ export const TRANSITION_CONFIG = {
   blurDuration: 1.6,
 }
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useRef, useState } from 'react'
 
 /**
- * @param {React.RefObject<HTMLVideoElement | null>} videoRef
  * @returns {{
- *   triggerRef: React.MutableRefObject<((opts: { onOverlayReveal: () => void }) => void) | null>,
- *   overlayActive: boolean,
- *   overlayVisible: boolean,
+ *   triggerRef:      React.MutableRefObject<((opts: { onOverlayReveal: () => void }) => void) | null>,
+ *   fireTransition:  () => void,
+ *   overlayActive:   boolean,
+ *   overlayVisible:  boolean,
  * }}
+ *
+ * `triggerRef.current`  – populated by BmoTransitionInner with its GSAP fn.
+ * `fireTransition`      – called by BmoTransitionInner on the 2nd red-button click.
  */
-export function useBmoTransition(videoRef) {
+export function useBmoTransition() {
   const [overlayActive, setOverlayActive] = useState(false)
   const [overlayVisible, setOverlayVisible] = useState(false)
+  const [step, setStep] = useState('initial') // 'initial' | 'playing' | 'ended' | 'transitioning'
 
-  /** BmoTransitionInner populates this with its GSAP animation fn */
+  /** BmoTransitionInner registers its GSAP animation fn here */
   const triggerRef = useRef(null)
 
   const hasTriggeredRef = useRef(false)
   const pauseTimerRef = useRef(null)
-  const pollRef = useRef(null)
 
-  const handleVideoEnded = useCallback(() => {
+  /**
+   * Called by BmoTransitionInner when the 2nd red-button click is detected.
+   * Guards against double-fire.
+   */
+  const fireTransition = () => {
     if (hasTriggeredRef.current) return
     hasTriggeredRef.current = true
 
-    // Mount overlay (invisible) immediately
+    setStep('transitioning')
+
+    // Mount the overlay (invisible) immediately
     setOverlayActive(true)
 
     pauseTimerRef.current = setTimeout(() => {
@@ -85,41 +94,7 @@ export function useBmoTransition(videoRef) {
         })
       }
     }, TRANSITION_CONFIG.cinematicPause * 1000)
-  }, [])
+  }
 
-  useEffect(() => {
-    let video = null
-
-    /**
-     * Poll until BMO populates videoRef.current, then attach the 'ended' listener.
-     * BMO creates the video element inside its own useEffect (async).
-     */
-    const tryAttach = () => {
-      if (videoRef.current && videoRef.current !== video) {
-        // New video element found — attach listener
-        if (video) video.removeEventListener('ended', handleVideoEnded)
-        video = videoRef.current
-        video.addEventListener('ended', handleVideoEnded)
-      }
-    }
-
-    // Try immediately (in case video already exists)
-    tryAttach()
-
-    // Keep polling every 200 ms until we have the video
-    pollRef.current = setInterval(() => {
-      if (videoRef.current) {
-        tryAttach()
-        clearInterval(pollRef.current)
-      }
-    }, 200)
-
-    return () => {
-      clearInterval(pollRef.current)
-      clearTimeout(pauseTimerRef.current)
-      if (video) video.removeEventListener('ended', handleVideoEnded)
-    }
-  }, [videoRef, handleVideoEnded])
-
-  return { triggerRef, overlayActive, overlayVisible }
+  return { triggerRef, fireTransition, overlayActive, overlayVisible, step, setStep }
 }
