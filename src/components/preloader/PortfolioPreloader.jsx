@@ -1,30 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 
-/**
- * PortfolioPreloader
- * ─────────────────────────────────────────────────────────────────────────────
- * A cinematic, atmospheric loading screen for Oussama Barhoumi's Digital World.
- *
- * Features:
- *   - Atmospheric background canvas with subtle, organic cyber-bugs crawling/twitching
- *   - Sharp, centered typography with Japanese / manga accents
- *   - Continuous realistic 0% → 100% progress counter
- *   - "SYSTEM READY" pulse at completion
- *   - Cinematic reveal transition into the 3D BMO experience
- * ─────────────────────────────────────────────────────────────────────────────
- */
+
 export default function PortfolioPreloader({ onComplete }) {
   const containerRef = useRef(null)
   const canvasRef = useRef(null)
   const contentRef = useRef(null)
-  const [progress, setProgress] = useState(0)
+  const [progress, setProgress] = useState(1)
   const [statusText, setStatusText] = useState('INITIALIZING BMO')
   const [isSystemReady, setIsSystemReady] = useState(false)
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // 1. Procedural Cyber-Insects Simulation (Canvas)
-  // ───────────────────────────────────────────────────────────────────────────
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -41,12 +27,11 @@ export default function PortfolioPreloader({ onComplete }) {
     }
     window.addEventListener('resize', handleResize)
 
-    // Check prefers-reduced-motion
+
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
     ).matches
 
-    // Bug entities definition
     const BUG_COUNT = window.innerWidth < 768 ? 5 : 8
 
     class Bug {
@@ -55,12 +40,12 @@ export default function PortfolioPreloader({ onComplete }) {
       }
 
       reset(initial = false) {
-        // Position across screen or spawn slightly off edges
+
         if (initial) {
           this.x = Math.random() * width
           this.y = Math.random() * height
         } else {
-          // Spawn near one edge
+
           const edge = Math.floor(Math.random() * 4)
           if (edge === 0) {
             this.x = Math.random() * width
@@ -83,17 +68,16 @@ export default function PortfolioPreloader({ onComplete }) {
         this.baseSpeed = this.speed
         this.turnSpeed = 0.03 + Math.random() * 0.04
 
-        // Insect dimensions (tiny & abstract)
-        this.size = 5.5 + Math.random() * 3.5 // body length
+        this.size = 5.5 + Math.random() * 3.5
         this.width = this.size * 0.45
         this.legs = 6
         this.stepCycle = Math.random() * Math.PI * 2
 
-        // Behavior states: 'crawling', 'pausing', 'scurrying'
+
         this.state = 'crawling'
         this.stateTimer = 60 + Math.random() * 140
 
-        // Visual opacity - very subtle contrast (atmospheric)
+
         this.baseOpacity = 0.08 + Math.random() * 0.09
         this.opacity = this.baseOpacity
         this.fadePhase = Math.random() * Math.PI
@@ -120,7 +104,7 @@ export default function PortfolioPreloader({ onComplete }) {
           this.targetAngle += (Math.random() - 0.5) * 1.8
         }
 
-        // Avoid screen center where typography sits (gentle repelling force)
+
         const centerX = width / 2
         const centerY = height / 2
         const distFromCenter = Math.hypot(this.x - centerX, this.y - centerY)
@@ -129,13 +113,12 @@ export default function PortfolioPreloader({ onComplete }) {
           this.targetAngle = repelAngle + (Math.random() - 0.5) * 0.6
         }
 
-        // Steer toward target angle
+
         let diff = this.targetAngle - this.angle
         while (diff < -Math.PI) diff += Math.PI * 2
         while (diff > Math.PI) diff -= Math.PI * 2
         this.angle += diff * this.turnSpeed
 
-        // Move if not paused
         if (this.state !== 'pausing') {
           this.x += Math.cos(this.angle) * this.speed
           this.y += Math.sin(this.angle) * this.speed
@@ -145,7 +128,7 @@ export default function PortfolioPreloader({ onComplete }) {
           this.stepCycle += 0.04
         }
 
-        // Natural fading into darkness & borders
+        // Natural fading into darkness
         this.fadePhase += 0.015
         const breathing = 0.8 + 0.2 * Math.sin(this.fadePhase)
         this.opacity = this.baseOpacity * breathing
@@ -286,8 +269,6 @@ export default function PortfolioPreloader({ onComplete }) {
     document.body.style.overflow = 'hidden'
 
     const ctx = gsap.context(() => {
-      const progressObj = { value: 0 }
-
       // Entrance animation for typography
       gsap.fromTo(
         '.preloader-fade-item',
@@ -302,53 +283,7 @@ export default function PortfolioPreloader({ onComplete }) {
         }
       )
 
-      // Dynamic 0% -> 100% progress animation
-      // Uses multi-phase realistic timing with micro-stutters
-      const tl = gsap.timeline({
-        onComplete: () => {
-          // Reached 100%: Show "SYSTEM READY"
-          setIsSystemReady(true)
-          setStatusText('SYSTEM READY')
 
-          // Hold for brief cinematic moment, then initiate exit reveal
-          gsap.delayedCall(0.38, () => {
-            triggerExitTransition()
-          })
-        },
-      })
-
-      tl.to(progressObj, {
-        value: 28,
-        duration: 0.7,
-        ease: 'power1.inOut',
-        onUpdate: () => setProgress(Math.floor(progressObj.value)),
-      })
-        .to(progressObj, {
-          value: 54,
-          duration: 0.65,
-          ease: 'power2.out',
-          onUpdate: () => setProgress(Math.floor(progressObj.value)),
-        })
-        .to(progressObj, {
-          value: 79,
-          duration: 0.55,
-          ease: 'power1.in',
-          onUpdate: () => setProgress(Math.floor(progressObj.value)),
-        })
-        .to(progressObj, {
-          value: 93,
-          duration: 0.45,
-          ease: 'power2.out',
-          onUpdate: () => setProgress(Math.floor(progressObj.value)),
-        })
-        .to(progressObj, {
-          value: 100,
-          duration: 0.4,
-          ease: 'power3.out',
-          onUpdate: () => setProgress(Math.floor(progressObj.value)),
-        })
-
-      // Exit transition choreography
       function triggerExitTransition() {
         const exitTl = gsap.timeline({
           onComplete: () => {
@@ -357,7 +292,6 @@ export default function PortfolioPreloader({ onComplete }) {
           },
         })
 
-        // 1. Text elements dissolve and slightly drift
         exitTl.to(contentRef.current, {
           opacity: 0,
           scale: 0.96,
@@ -367,7 +301,6 @@ export default function PortfolioPreloader({ onComplete }) {
           ease: 'power2.in',
         })
 
-        // 2. Background canvas and veil expand and smoothly reveal the BMO scene
         exitTl.to(
           canvasRef.current,
           {
@@ -388,6 +321,34 @@ export default function PortfolioPreloader({ onComplete }) {
           },
           '-=0.65'
         )
+      }
+
+      // Smooth, sequential 1% to 100% progress counter (strictly one by one)
+      let currentVal = 1
+      setProgress(1)
+
+      const STEP_DURATION = 60 // 60ms per percentage => ~6s total smooth progression
+
+      const progressTimer = setInterval(() => {
+        currentVal += 1
+        if (currentVal >= 100) {
+          currentVal = 100
+          setProgress(100)
+          clearInterval(progressTimer)
+
+          setIsSystemReady(true)
+          setStatusText('SYSTEM READY')
+
+          gsap.delayedCall(0.4, () => {
+            triggerExitTransition()
+          })
+        } else {
+          setProgress(currentVal)
+        }
+      }, STEP_DURATION)
+
+      return () => {
+        clearInterval(progressTimer)
       }
     }, containerRef)
 
@@ -523,33 +484,15 @@ export default function PortfolioPreloader({ onComplete }) {
           <div
             style={{
               position: 'relative',
-              width: 'min(330px, 85vw)',
-              height: '100px',
+              width: 'min(580px, 90vw)',
+              height: '170px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '2px 0 6px 0',
             }}
           >
-            {/* Background / Silhouette Sword (Ghost outline) */}
-            <img
-              src="/img/sowerd.png"
-              alt="Sword Silhouette"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                transform: 'scaleX(-1)',
-                opacity: 0.32,
-                filter: 'brightness(0.6) saturate(0.7)',
-                pointerEvents: 'none',
-                userSelect: 'none',
-              }}
-            />
-
-            {/* Foreground / Active Filled Sword (Revealed with progress) */}
+            {/* Active Filled Sword (Revealed with progress from 1% to 100%) */}
             <div
               style={{
                 position: 'absolute',
@@ -557,7 +500,7 @@ export default function PortfolioPreloader({ onComplete }) {
                 width: '100%',
                 height: '100%',
                 clipPath: `inset(0 ${100 - progress}% 0 0)`,
-                transition: 'clip-path 0.05s linear',
+                transition: 'clip-path 0.03s linear',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -566,40 +509,20 @@ export default function PortfolioPreloader({ onComplete }) {
             >
               <img
                 src="/img/sowerd.png"
-                alt="Sword Progress Line"
+                alt="Sword Progress"
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
                   transform: 'scaleX(-1)',
                   filter: isSystemReady
-                    ? 'brightness(1.25) drop-shadow(0 0 16px #FF4D4D) drop-shadow(0 0 32px #FF2222)'
-                    : 'brightness(1.15) drop-shadow(0 0 10px rgba(255, 60, 60, 0.85)) drop-shadow(0 0 20px rgba(255, 30, 30, 0.45))',
+                    ? 'brightness(1.2) drop-shadow(0 0 14px rgba(255, 77, 77, 0.8))'
+                    : 'brightness(1.05)',
                   transition: 'filter 0.35s ease',
                   userSelect: 'none',
                 }}
               />
             </div>
-
-            {/* Glowing Energy Spark at the sword's filling edge */}
-            {progress > 2 && progress < 99 && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '12%',
-                  bottom: '12%',
-                  left: `${progress}%`,
-                  width: '2.5px',
-                  transform: 'translateX(-50%)',
-                  background:
-                    'linear-gradient(to bottom, transparent, #FFFFFF 40%, #FF6565 60%, transparent)',
-                  boxShadow:
-                    '0 0 10px #FF5555, 0 0 20px rgba(255, 40, 40, 0.9), 0 0 35px rgba(255, 0, 0, 0.6)',
-                  pointerEvents: 'none',
-                  zIndex: 4,
-                }}
-              />
-            )}
           </div>
 
           {/* Status Text & Dynamic Percentage */}
@@ -608,7 +531,7 @@ export default function PortfolioPreloader({ onComplete }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              width: 'min(330px, 85vw)',
+              width: 'min(580px, 90vw)',
               fontFamily:
                 "'Space Grotesk', 'Courier New', Courier, monospace",
               fontSize: '11px',
