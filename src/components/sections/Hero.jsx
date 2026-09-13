@@ -3,11 +3,19 @@ import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
 import BMO from '../3d/BMO'
 import { BmoSpeechBubble, DEFAULT_DIALOGUE_LINES } from '../BmoSpeechBubble'
+// ── BMO → Home transition (isolated — safe to remove) ──
+import { useBmoTransition } from '../../hooks/useBmoTransition'
+import BmoTransitionInner from '../transition/BmoTransitionInner'
+import BmoTransitionOverlay from '../transition/BmoTransitionOverlay'
 
 export default function Hero() {
   const containerRef = useRef()
   const videoRef = useRef(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+
+  // ── BMO → Home transition ──────────────────────────────────────────────────
+  const { triggerRef, overlayActive, overlayVisible } = useBmoTransition(videoRef)
+  // ──────────────────────────────────────────────────────────────────────────
 
   const handleMouseMove = useCallback((e) => {
     // Normalise mouse to -1…1 range
@@ -90,6 +98,9 @@ export default function Hero() {
             onAssemblyComplete={handleAssemblyComplete}
           />
         </Suspense>
+
+        {/* BMO → Home transition — isolated, safe to remove */}
+        <BmoTransitionInner triggerRef={triggerRef} />
       </Canvas>
 
       {/* Video-Synchronized BMO Manga Speech Bubble Overlay */}
@@ -134,6 +145,9 @@ export default function Hero() {
             'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.65) 100%)',
         }}
       />
+
+      {/* BMO → Home transition overlay — isolated, safe to remove */}
+      <BmoTransitionOverlay active={overlayActive} visible={overlayVisible} />
     </section>
   )
 }
