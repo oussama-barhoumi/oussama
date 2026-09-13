@@ -156,6 +156,7 @@ export default function BMO({
   mousePosition = { x: 0, y: 0 },
   onAssemblyComplete,
   videoRef: externalVideoRef,
+  startAnimation = true,
 }) {
   const REST_Y = -2.8
 
@@ -180,6 +181,10 @@ export default function BMO({
   const targetsRef = useRef([])
 
   const playReturnToOriginalRef = useRef(null)
+
+  const hasStartedAnimationRef = useRef(false)
+  const startAnimationRef = useRef(startAnimation)
+  startAnimationRef.current = startAnimation
 
   // ============================================================
   // VIDEO REFS
@@ -472,7 +477,11 @@ export default function BMO({
       timelineRef.current = null
     }
 
-    const tl = gsap.timeline()
+    const tl = gsap.timeline({
+      onComplete: () => {
+        isEyeLockedRef.current = true
+      },
+    })
 
     targets.forEach(
       (
@@ -545,11 +554,14 @@ export default function BMO({
   }, [playReturnToOriginal])
 
   // ============================================================
-  // PREPARE BMO COMPONENTS
+  // PREPARE BMO COMPONENTS (RUNS ONCE PER SCENE)
   // ============================================================
 
   useEffect(() => {
     if (!scene) return
+
+    // If targets already initialized for this scene, keep them
+    if (targetsRef.current && targetsRef.current.length > 0) return
 
     const components =
       getBMOComponentGroups(scene)
@@ -566,6 +578,14 @@ export default function BMO({
 
       return
     }
+
+    // Cache original transforms first before any position modification
+    components.forEach((comp) => {
+      if (!comp.userData.originalPos) {
+        comp.userData.originalPos = comp.position.clone()
+        comp.userData.originalRot = comp.rotation.clone()
+      }
+    })
 
     // Find main body
     const bodyGroup =
@@ -592,12 +612,12 @@ export default function BMO({
     // Calculate animation targets
     const targets = components.map(
       (comp, index) => {
-        // Save exact original GLB transforms
+        // Use true original GLB transforms from cache
         const origPos =
-          comp.position.clone()
+          comp.userData.originalPos.clone()
 
         const origRot =
-          comp.rotation.clone()
+          comp.userData.originalRot.clone()
 
         const compBox =
           new THREE.Box3().setFromObject(
@@ -693,20 +713,59 @@ export default function BMO({
     )
 
     targetsRef.current = targets
+    hasStartedAnimationRef.current = false
 
-    // Initial automatic assembly
-    playAssembly(
-      CATEGORY_TIMING,
-      true
-    )
+    if (groupRef.current) {
+      groupRef.current.rotation.set(-0.22, 0.15, 0)
+      groupRef.current.position.y = REST_Y
+      groupRef.current.scale.set(
+        modelScale,
+        modelScale,
+        modelScale
+      )
+    }
 
+    // Trigger assembly if startAnimation is already true upon scene load
+    if (startAnimationRef.current && !hasStartedAnimationRef.current) {
+      hasStartedAnimationRef.current = true
+      playAssembly(
+        CATEGORY_TIMING,
+        true
+      )
+    }
+  }, [scene])
+
+  // ============================================================
+  // TRIGGER ASSEMBLY WHEN PRELOADER FINISHES
+  // ============================================================
+
+  useEffect(() => {
+    if (
+      startAnimation &&
+      !hasStartedAnimationRef.current &&
+      targetsRef.current &&
+      targetsRef.current.length > 0
+    ) {
+      hasStartedAnimationRef.current = true
+      playAssembly(
+        CATEGORY_TIMING,
+        true
+      )
+    }
+  }, [startAnimation, playAssembly])
+
+  // ============================================================
+  // CLEANUP ON UNMOUNT
+  // ============================================================
+
+  useEffect(() => {
     return () => {
       if (timelineRef.current) {
         timelineRef.current.kill()
         timelineRef.current = null
       }
     }
-  }, [scene, playAssembly])
+  }, [])
 
   // ============================================================
   // VIDEO TEXTURE → Object_44

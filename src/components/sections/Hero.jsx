@@ -9,14 +9,14 @@ import BmoTransitionInner from '../transition/BmoTransitionInner'
 import BmoTransitionOverlay from '../transition/BmoTransitionOverlay'
 import BmoInteractionHint from '../transition/BmoInteractionHint'
 
-export default function Hero() {
+export default function Hero({ isPreloaderFinished = true }) {
   const containerRef = useRef()
   const videoRef = useRef(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isAssembled, setIsAssembled] = useState(false)
 
   // ── BMO → Home transition ──────────────────────────────────────────────────
-  const { triggerRef, fireTransition, overlayActive, overlayVisible, step, setStep } = useBmoTransition()
+  const { triggerRef, fireTransition, overlayActive, overlayVisible, step, setStep } = useBmoTransition(videoRef)
   // ──────────────────────────────────────────────────────────────────────────
 
   const handleMouseMove = useCallback((e) => {
@@ -31,10 +31,11 @@ export default function Hero() {
   }, [])
 
   useEffect(() => {
+    if (!isPreloaderFinished) return
     // Fallback: reveal hint smoothly even if assembly event timing varies
-    const timer = setTimeout(() => setIsAssembled(true), 2500)
+    const timer = setTimeout(() => setIsAssembled(true), 5500)
     return () => clearTimeout(timer)
-  }, [])
+  }, [isPreloaderFinished])
 
   return (
     <section
@@ -104,6 +105,7 @@ export default function Hero() {
             videoRef={videoRef}
             mousePosition={mousePosition}
             onAssemblyComplete={handleAssemblyComplete}
+            startAnimation={isPreloaderFinished}
           />
         </Suspense>
 

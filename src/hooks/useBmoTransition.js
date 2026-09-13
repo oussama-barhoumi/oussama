@@ -74,20 +74,17 @@ export function useBmoTransition(videoRef) {
 
 
     const tryAttach = () => {
-      if (videoRef.current && videoRef.current !== video) {
-
+      if (videoRef?.current && videoRef.current !== video) {
         if (video) video.removeEventListener('ended', handleVideoEnded)
         video = videoRef.current
         video.addEventListener('ended', handleVideoEnded)
       }
     }
 
-
     tryAttach()
 
-
     pollRef.current = setInterval(() => {
-      if (videoRef.current) {
+      if (videoRef?.current) {
         tryAttach()
         clearInterval(pollRef.current)
       }

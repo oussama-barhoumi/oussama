@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Adventure Time Logo';
+  src: url('/fonts/AdventureTimeLogo.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {
