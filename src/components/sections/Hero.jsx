@@ -9,7 +9,7 @@ import BmoTransitionInner from '../transition/BmoTransitionInner'
 import BmoTransitionOverlay from '../transition/BmoTransitionOverlay'
 import BmoInteractionHint from '../transition/BmoInteractionHint'
 
-export default function Hero({ isPreloaderFinished = true }) {
+export default function Hero({ isPreloaderFinished = true, onTransitionClimax }) {
   const containerRef = useRef()
   const videoRef = useRef(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
@@ -18,6 +18,15 @@ export default function Hero({ isPreloaderFinished = true }) {
   // ── BMO → Home transition ──────────────────────────────────────────────────
   const { triggerRef, fireTransition, overlayActive, overlayVisible, step, setStep } = useBmoTransition(videoRef)
   // ──────────────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (overlayVisible && onTransitionClimax) {
+      const timer = setTimeout(() => {
+        onTransitionClimax()
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [overlayVisible, onTransitionClimax])
 
   const handleMouseMove = useCallback((e) => {
     // Normalise mouse to -1…1 range
@@ -36,6 +45,7 @@ export default function Hero({ isPreloaderFinished = true }) {
     const timer = setTimeout(() => setIsAssembled(true), 5500)
     return () => clearTimeout(timer)
   }, [isPreloaderFinished])
+
 
   return (
     <section

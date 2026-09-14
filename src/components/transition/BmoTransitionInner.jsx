@@ -114,6 +114,31 @@ export default function BmoTransitionInner({ triggerRef, fireTransition, videoRe
 
       const canvas = gl.domElement
 
+      // ── Compute face screen-space position for transform-origin ──────────
+      // Project BMO's face mesh (Object_44) world center to screen coordinates
+      // so the CSS scale zoom visually converges on the face, not canvas center.
+      let originX = 50
+      let originY = 50
+
+      try {
+        const faceMesh = scene.getObjectByName('Object_44')
+        if (faceMesh) {
+          const faceBox = new THREE.Box3().setFromObject(faceMesh)
+          const faceWorldCenter = faceBox.getCenter(new THREE.Vector3())
+
+          // Project world point → NDC
+          const ndc = faceWorldCenter.clone().project(camera)
+
+          // Convert NDC (-1..1) to percentage of canvas
+          originX = ((ndc.x + 1) / 2) * 100
+          originY = ((1 - ndc.y) / 2) * 100   // Y is flipped in NDC vs CSS
+        }
+      } catch (_) {
+        // Fallback to canvas center if anything fails
+      }
+
+      const transformOriginValue = `${originX.toFixed(2)}% ${originY.toFixed(2)}%`
+
       // Plain-object proxies that GSAP can tween
       const camProxy = { z: camera.position.z, fov: camera.fov }
       const blurProxy = { value: 0 }
@@ -139,6 +164,8 @@ export default function BmoTransitionInner({ triggerRef, fireTransition, videoRe
       )
 
       // ── 2. Canvas CSS scale (BMO fills viewport at climax) ───────────────
+      // transformOrigin is set to the projected face center so the scale zoom
+      // converges on BMO's face rather than the canvas geometric center.
       tl.to(
         scaleProxy,
         {
@@ -147,7 +174,7 @@ export default function BmoTransitionInner({ triggerRef, fireTransition, videoRe
           ease: C.pushInEase,
           onUpdate: () => {
             canvas.style.transform = `scale(${scaleProxy.value.toFixed(4)})`
-            canvas.style.transformOrigin = 'center center'
+            canvas.style.transformOrigin = transformOriginValue
           },
         },
         0

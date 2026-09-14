@@ -46,6 +46,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 export function useBmoTransition(videoRef) {
   const [overlayActive, setOverlayActive] = useState(false)
   const [overlayVisible, setOverlayVisible] = useState(false)
+  const [step, setStep] = useState('initial') // 'initial' | 'playing' | 'ended' | 'transitioning'
 
   const triggerRef = useRef(null)
 
@@ -53,11 +54,11 @@ export function useBmoTransition(videoRef) {
   const pauseTimerRef = useRef(null)
   const pollRef = useRef(null)
 
-  const handleVideoEnded = useCallback(() => {
+  const fireTransition = useCallback(() => {
     if (hasTriggeredRef.current) return
     hasTriggeredRef.current = true
 
-
+    setStep('transitioning')
     setOverlayActive(true)
 
     pauseTimerRef.current = setTimeout(() => {
@@ -69,9 +70,13 @@ export function useBmoTransition(videoRef) {
     }, TRANSITION_CONFIG.cinematicPause * 1000)
   }, [])
 
+  const handleVideoEnded = useCallback(() => {
+    setStep('ended')
+    // We also support auto-firing or letting user click red button
+  }, [])
+
   useEffect(() => {
     let video = null
-
 
     const tryAttach = () => {
       if (videoRef?.current && videoRef.current !== video) {
@@ -97,5 +102,6 @@ export function useBmoTransition(videoRef) {
     }
   }, [videoRef, handleVideoEnded])
 
-  return { triggerRef, overlayActive, overlayVisible }
+  return { triggerRef, fireTransition, overlayActive, overlayVisible, step, setStep }
 }
+
