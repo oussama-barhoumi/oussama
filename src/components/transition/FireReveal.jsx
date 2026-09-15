@@ -182,7 +182,7 @@ export default function FireReveal({ active, onComplete }) {
         else ctx.lineTo(x, y)
       }
       ctx.lineWidth = 22
-      ctx.strokeStyle = 'rgba(155, 20, 26, 0.85)'
+      ctx.strokeStyle = 'linear-gradient(50deg,rgba(0, 0, 0, 1) 0%, rgba(210, 0, 0, 1) 50%, rgba(220, 7, 7, 1) 100%)'
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       ctx.stroke()
