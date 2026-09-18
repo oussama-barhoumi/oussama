@@ -127,8 +127,8 @@ export default function MarqueeText() {
   useEffect(() => {
     const items = railRef.current.querySelectorAll('h4');
 
-    // Define your base speed here (0.015 is an ultra-slow, delicate glide)
-    const BASE_SPEED = 0.015;
+    // Base speed
+    const BASE_SPEED = 1.5;
 
     // Kill any previous tweens on items to avoid hot-reload conflicts
     gsap.killTweensOf(items);
@@ -202,6 +202,7 @@ export default function MarqueeText() {
           transform: 'translateY(-50%)',
           zIndex: 5,
           overflow: 'hidden',
+          pointerEvents: 'none',
         }}
       >
         <div className="marquee-rail rail" ref={railRef}>

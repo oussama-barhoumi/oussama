@@ -29,7 +29,7 @@ function LogoMesh() {
  * LogoCanvas – renders the spinning logo inside a Three.js Canvas.
  * Designed to be placed in the top-right corner of the Home page.
  */
-export default function LogoCanvas() {
+export default function LogoCanvas({ style }) {
   return (
     <Canvas
       style={{
@@ -41,6 +41,7 @@ export default function LogoCanvas() {
         zIndex: 10,
         background: 'transparent',
         pointerEvents: 'none',
+        ...style,
       }}
       camera={{ position: [0, 0, 4], fov: 50 }}
       gl={{ alpha: true }}

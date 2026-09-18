@@ -74,7 +74,7 @@ function getScatterOffset(index, total) {
   const angle1 = index * goldenRatio * Math.PI * 2
   const angle2 = (index / Math.max(total, 1)) * Math.PI
 
-  const radius = 2.8 + (index % 4) * 0.8
+  const radius = 2 + (index % 4) * 0.8
 
   return {
     position: new THREE.Vector3(
@@ -1380,7 +1380,7 @@ export default function BMO({
     <group
       ref={groupRef}
       scale={modelScale}
-      position={[0.2, -2.8, 1]}
+      position={[0.2, -2, 1]}
     >
       <group
         ref={innerRef}

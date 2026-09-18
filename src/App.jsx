@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import Hero from './components/sections/Hero'
 import Home from './components/sections/Home'
-import FireReveal from './components/transition/FireReveal'
+import MeltReveal from './components/transition/MeltReveal'
 import PortfolioPreloader from './components/preloader/PortfolioPreloader'
 
 /* ── Bubble Skip Button ────────────────────────────────────────────────────── */
@@ -109,32 +109,51 @@ function SkipButton({ onClick }) {
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false)
-  const [showHome, setShowHome] = useState(false)
+  const [heroFinished, setHeroFinished] = useState(false)
   const [fireActive, setFireActive] = useState(false)
   const [transitionComplete, setTransitionComplete] = useState(false)
+  const [homeReveal, setHomeReveal] = useState(false)
 
   const handlePreloaderComplete = useCallback(() => {
     setIsLoaded(true)
   }, [])
 
+  /**
+   * Called by Hero when BMO finishes its push-in zoom into black.
+   * Hero has completed cleanly — now we unmount Hero and start MeltReveal on Home.
+   */
   const handleBmoTransitionClimax = useCallback(() => {
-    setShowHome(true)
+    setHeroFinished(true)
     setFireActive(true)
   }, [])
 
+  /**
+   * Called by MeltReveal as the paint wave sweeps down across Home.
+   * Triggers Home's entrance mask animation right as the face is uncovered.
+   */
+  const handleHalfway = useCallback(() => {
+    setHomeReveal(true)
+  }, [])
+
+  /**
+   * Called by MeltReveal when the paint fully finishes revealing Home.
+   * At this moment it is safe to:
+   *  - unmount MeltReveal
+   *  - switch Home from fixed→relative layout for normal scrolling
+   */
   const handleFireComplete = useCallback(() => {
     setFireActive(false)
     setTransitionComplete(true)
   }, [])
 
-  // Skip handler — jumps straight to the fire reveal
+  // Skip handler — jumps straight to the Home reveal
   const handleSkip = useCallback(() => {
     if (transitionComplete || fireActive) return
-    setShowHome(true)
+    setHeroFinished(true)
     setFireActive(true)
   }, [transitionComplete, fireActive])
 
-  // Dev shortcut: Press 'f' or 'F' to trigger the Fire Reveal transition directly for testing
+  // Dev shortcut: Press 'f' or 'F' to trigger the reveal transition directly for testing
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (
@@ -143,7 +162,7 @@ function App() {
         !e.ctrlKey &&
         !fireActive
       ) {
-        setShowHome(true)
+        setHeroFinished(true)
         setFireActive(true)
       }
     }
@@ -153,32 +172,62 @@ function App() {
 
   return (
     <>
-      {/* Existing BMO Hero experience mounts underneath until Home transition completes */}
-      {!transitionComplete && (
-        <Hero
-          isPreloaderFinished={isLoaded}
-          onTransitionClimax={handleBmoTransitionClimax}
-        />
-      )}
-
-      {/* Home page mounts behind the fire reveal */}
-      {showHome && (
+      {/*
+        ── HOME  (z: 1) ───────────────────────────────────────────────────────
+        Pre-mounted as soon as the preloader completes.
+        While Hero is active: position:fixed keeps it out of layout flow.
+        When Hero finishes: MeltReveal sweeps downward from top to bottom over
+        Home, progressively unveiling it.
+        After transitionComplete: switches to position:relative for normal scrolling.
+      */}
+      {isLoaded && (
         <div
           style={{
             position: transitionComplete ? 'relative' : 'fixed',
             inset: 0,
-            zIndex: 10,
+            zIndex: 1,
             width: '100%',
             minHeight: '100vh',
           }}
         >
-          <Home />
+          <Home revealed={homeReveal} />
         </div>
       )}
 
-      {/* Cinematic fire reveal transition: Burns bottom -> top */}
+      {/*
+        ── HERO  (z: 10) ──────────────────────────────────────────────────────
+        BMO Hero intro experience. Runs cleanly with its full 3D push-in and
+        fade-to-black climax — without any MeltReveal cutting into it.
+        Unmounts cleanly once its climax concludes (heroFinished=true).
+      */}
+      {isLoaded && !heroFinished && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10,
+            width: '100%',
+            height: '100dvh',
+          }}
+        >
+          <Hero
+            isPreloaderFinished={isLoaded}
+            onTransitionClimax={handleBmoTransitionClimax}
+          />
+        </div>
+      )}
+
+      {/*
+        ── MELT REVEAL TRANSITION  (z: 200) ────────────────────────────────────
+        Runs exclusively on the Home section: starts fully covered in black and
+        melts/sweeps DOWNWARD (top → bottom), revealing the Home section beneath.
+      */}
       {fireActive && (
-        <FireReveal active={fireActive} onComplete={handleFireComplete} />
+        <MeltReveal
+          active={fireActive}
+          onHalfway={handleHalfway}
+          onComplete={handleFireComplete}
+        />
       )}
 
       {/* Bubble skip button — visible only during the BMO intro */}

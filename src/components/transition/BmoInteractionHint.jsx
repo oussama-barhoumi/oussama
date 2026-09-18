@@ -8,20 +8,11 @@ import React from 'react'
  * Uses the exact same font ('Klee One', 'Yomogi', 'Caveat') and color palette
  * (warm cream paper #F7F3EA and rich brown ink #2B2620) as the speech bubble.
  *
- * Requirements addressed:
- *   ✓ Same font as the manga bubble
- *   ✓ Removed red border
- *   ✓ Removed red button / dot icon
- *   ✓ Changed color scheme to brown & paper
- *
  * States:
  *   - 'initial': "Press the red button to start"
  *   - 'playing': hidden while BMO talks / video plays
  *   - 'ended':   "Press the red button to continue"
  *   - 'transitioning': hidden during push-in zoom
- *
- * ⚠️  ISOLATED — remove or modify without affecting BMO internals.
- * ─────────────────────────────────────────────────────────────────────────────
  */
 export default function BmoInteractionHint({ step = 'initial', isAssembled = true }) {
   // Only show when BMO is assembled and not in transition or playing

@@ -7,7 +7,8 @@ import { BmoSpeechBubble, DEFAULT_DIALOGUE_LINES } from '../BmoSpeechBubble'
 import { useBmoTransition } from '../../hooks/useBmoTransition'
 import BmoTransitionInner from '../transition/BmoTransitionInner'
 import BmoTransitionOverlay from '../transition/BmoTransitionOverlay'
-import BmoInteractionHint from '../transition/BmoInteractionHint'
+import PeelSticker from '../animations/PeelSticker'
+
 
 export default function Hero({ isPreloaderFinished = true, onTransitionClimax }) {
   const containerRef = useRef()
@@ -18,6 +19,8 @@ export default function Hero({ isPreloaderFinished = true, onTransitionClimax })
   // ── BMO → Home transition ──────────────────────────────────────────────────
   const { triggerRef, fireTransition, overlayActive, overlayVisible, step, setStep } = useBmoTransition(videoRef)
   // ──────────────────────────────────────────────────────────────────────────
+
+
 
   useEffect(() => {
     if (overlayVisible && onTransitionClimax) {
@@ -56,9 +59,71 @@ export default function Hero({ isPreloaderFinished = true, onTransitionClimax })
         width: '100%',
         height: '100vh',
         overflow: 'hidden',
-        background: '#070707',
+        background: "#070707 url('/img/bgwordnmo.png') center/cover no-repeat",
       }}
     >
+
+      {/* Doctor sticker with Peel Effect on hover */}
+      <PeelSticker
+        src="/img/doctor.png"
+        alt="Doctor Sticker"
+        style={{
+          position: 'absolute',
+          bottom: '28%',
+          right: '72%',
+          width: 'clamp(150px, 20vw, 300px)',
+          aspectRatio: '600 / 270',
+          transform: `
+        translate(-50%, -50%)
+        rotate(-3deg)
+        skewY(-10deg)
+        perspective(800px)
+        rotateY(20deg)
+      `,
+          zIndex: 10,
+        }}
+      />
+
+      {/* Graffiti / Marker wall writing */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '90%',
+          width: '500px',
+
+          transform: `
+      translate(-50%, -50%)
+      rotate(-10deg)
+      skewY(18deg)
+      perspective(600px)
+      rotateY(-55deg)
+    `,
+
+          transformOrigin: 'center center',
+          zIndex: 20,
+          pointerEvents: 'none',
+          opacity: 0.92,
+        }}
+      >
+        <div
+          style={{
+            margin: 0,
+            fontFamily: "'Permanent Marker', cursive",
+            fontSize: 'clamp(28px, 4.2vw, 56px)',
+            lineHeight: 0.95,
+            color: 'rgba(32, 23, 10, 0.94)',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+            transform: 'rotate(-2deg)',
+            whiteSpace: 'normal',
+          }}
+        >
+          PRESS THE RED BUTTON TO START
+        </div>
+      </div>
+
+
       <Canvas
         camera={{
           position: [0, 0, 8],
@@ -68,12 +133,13 @@ export default function Hero({ isPreloaderFinished = true, onTransitionClimax })
         }}
         dpr={[1, 1.5]}
         gl={{
+          alpha: true,
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 0.95,
           outputColorSpace: THREE.SRGBColorSpace,
         }}
-        style={{ position: 'absolute', inset: 0 }}
+        style={{ position: 'absolute', inset: 0, background: 'transparent' }}
       >
         {/* Subtle dark ambient light */}
         <ambientLight intensity={0.25} color="#e6dfd5" />
@@ -172,8 +238,8 @@ export default function Hero({ isPreloaderFinished = true, onTransitionClimax })
         }}
       />
 
-      {/* Bottom hint banner: guides the user to press the red button */}
-      <BmoInteractionHint step={step} isAssembled={isAssembled} />
+
+
 
       {/* BMO → Home transition overlay — isolated, safe to remove */}
       <BmoTransitionOverlay active={overlayActive} visible={overlayVisible} />
