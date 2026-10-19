@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import Hero from './components/sections/Hero'
 import Home from './components/sections/Home'
+import NewSection from './components/sections/NewSection'
+import Education from './components/sections/Education'
 import MeltReveal from './components/transition/MeltReveal'
 import PortfolioPreloader from './components/preloader/PortfolioPreloader'
 
@@ -173,25 +175,26 @@ function App() {
   return (
     <>
       {/*
-        ── HOME  (z: 1) ───────────────────────────────────────────────────────
-        Pre-mounted as soon as the preloader completes.
-        While Hero is active: position:fixed keeps it out of layout flow.
-        When Hero finishes: MeltReveal sweeps downward from top to bottom over
-        Home, progressively unveiling it.
-        After transitionComplete: switches to position:relative for normal scrolling.
+        ── MAIN CONTENT FLOW  (z: 1) ──────────────────────────────────────────
+        Natural vertical document flow containing Home and About Me (NewSection).
+        Must remain un-fixed so real vertical scrolling is always preserved.
       */}
       {isLoaded && (
-        <div
+        <main
+          className="main-content-flow"
           style={{
-            position: transitionComplete ? 'relative' : 'fixed',
-            inset: 0,
+            position: 'relative',
             zIndex: 1,
             width: '100%',
             minHeight: '100vh',
           }}
         >
           <Home revealed={homeReveal} />
-        </div>
+          <div className="education-transition">
+            <NewSection />
+            <Education />
+          </div>
+        </main>
       )}
 
       {/*

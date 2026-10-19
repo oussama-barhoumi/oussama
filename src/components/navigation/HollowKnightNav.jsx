@@ -229,7 +229,7 @@ export default function HollowKnightNav({ isOpen, onMouseEnter, onMouseLeave }) 
               display: 'block',
               width: 'fit-content',
               textDecoration: 'none',
-              fontFamily: "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: isHovered ? "'Comico', sans-serif" : "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif",
               fontSize: 'clamp(11px, 1.1vw, 13px)',
               fontWeight: 600,
               letterSpacing: '0.16em',

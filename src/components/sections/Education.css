@@ -1,0 +1,62 @@
+.education-section {
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+
+  background: #040001;
+
+  color: #ffffff;
+
+  overflow: hidden;
+
+  z-index: 1;
+}
+
+/* ─────────────────────────────────────────────
+   EDUCATION CONTENT
+───────────────────────────────────────────── */
+
+.education-section__content {
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+
+  display: grid;
+
+  place-items: center;
+
+  z-index: 1;
+}
+
+.education-section__content p {
+  margin: 0;
+
+  color:
+    rgba(255,
+      255,
+      255,
+      0.92);
+
+  font-family:
+    'Panchang',
+    sans-serif;
+
+  font-size:
+    clamp(2.5rem,
+      8vw,
+      9rem);
+
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+
+  text-shadow:
+    0 4px 24px rgba(0,
+      0,
+      0,
+      0.5);
+}

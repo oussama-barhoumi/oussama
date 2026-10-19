@@ -1,0 +1,240 @@
+/* ============================================================
+   MASK GLOW
+============================================================ */
+
+@keyframes maskSubtleGlow {
+
+  0%,
+  100% {
+    filter:
+      drop-shadow(0 0 10px rgba(225, 20, 20, 0.75)) drop-shadow(0 0 22px rgba(255, 30, 30, 0.45)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95));
+  }
+
+  50% {
+    filter:
+      drop-shadow(0 0 16px rgba(255, 40, 40, 0.95)) drop-shadow(0 0 32px rgba(230, 20, 20, 0.65)) drop-shadow(0 4px 18px rgba(0, 0, 0, 1));
+  }
+}
+
+
+/* ============================================================
+   MAIN POSITION
+============================================================ */
+
+.mask-reveal__position {
+  position: fixed;
+
+  bottom: -150px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  z-index: 7;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  width: 100%;
+
+  pointer-events: none;
+
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
+}
+
+
+/* ============================================================
+   STAGE
+============================================================ */
+
+.mask-reveal__stage {
+  position: relative;
+
+  display: inline-block;
+
+  width: 90vw;
+  max-width: 90vw;
+
+  height: 88vh;
+  max-height: 92vh;
+
+  line-height: 0;
+
+  transform-style: preserve-3d;
+
+  will-change: transform;
+}
+
+
+/* ============================================================
+   CONTAINER
+============================================================ */
+
+.mask-reveal__container {
+  position: absolute;
+
+  top: 3%;
+  left: 42%;
+
+  width: 118%;
+  height: 88%;
+
+  transform: translateX(-50%);
+
+  z-index: 7;
+
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
+
+  transform-style: preserve-3d;
+}
+
+
+/* ============================================================
+   LAYER
+============================================================ */
+
+.mask-reveal__layer {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  transform-style: preserve-3d;
+}
+
+
+/* ============================================================
+   MASKS
+============================================================ */
+
+.mask-reveal__left,
+.mask-reveal__right {
+  position: absolute;
+
+  top: 0;
+
+  width: 65%;
+  height: 100%;
+
+  transform-style: preserve-3d;
+
+  backface-visibility: visible;
+
+  will-change: transform;
+}
+
+
+/* LEFT */
+
+.mask-reveal__left {
+  right: 30%;
+
+  transform-origin: 100% center;
+}
+
+
+/* RIGHT */
+
+.mask-reveal__right {
+  left: 45%;
+
+  transform-origin: left center;
+}
+
+
+/* ============================================================
+   MASK IMAGES
+============================================================ */
+
+.mask-reveal__left img,
+.mask-reveal__right img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  backface-visibility: visible;
+
+  user-select: none;
+  pointer-events: none;
+
+  -webkit-user-drag: none;
+
+  animation:
+    maskSubtleGlow 3s ease-in-out infinite;
+}
+
+
+/* Keep each half aligned correctly */
+
+.mask-reveal__left img {
+  object-position: right center;
+}
+
+.mask-reveal__right img {
+  object-position: left center;
+}
+
+
+/* ============================================================
+   3D DEPTH
+============================================================ */
+
+.mask-reveal__position,
+.mask-reveal__stage,
+.mask-reveal__container,
+.mask-reveal__layer,
+.mask-reveal__left,
+.mask-reveal__right {
+  transform-style: preserve-3d;
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 768px) {
+  .mask-reveal__position {
+    bottom: -100px;
+
+    perspective: 1100px;
+  }
+
+  .mask-reveal__stage {
+    width: 110vw;
+    max-width: 110vw;
+
+    height: 82vh;
+    max-height: 88vh;
+  }
+
+  .mask-reveal__container {
+    width: 120%;
+    height: 88%;
+
+    left: 50%;
+  }
+
+  .mask-reveal__left,
+  .mask-reveal__right {
+    width: 68%;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .mask-reveal__left img,
+  .mask-reveal__right img {
+    animation: none;
+  }
+}

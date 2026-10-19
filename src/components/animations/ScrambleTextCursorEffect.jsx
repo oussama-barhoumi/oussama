@@ -143,11 +143,11 @@ export default function ScrambleTextCursorEffect({
           // TEXT
           // =================================
           fontFamily: "'Panchang', sans-serif",
-          fontWeight: 400,
+          fontWeight: 500,
           fontStyle: 'normal',
 
-          fontSize: 'clamp(11px, 0.88vw, 13.5px)',
-          lineHeight: 1.7,
+          fontSize: 'clamp(9px, 0.88vw, 13.5px)',
+          lineHeight: 2,
           letterSpacing: '0.01em',
 
           color: 'rgba(255, 255, 255, 0.82)',
@@ -191,7 +191,6 @@ export default function ScrambleTextCursorEffect({
           top: -4px;
           left: 0;
           width: 100%;
-          height: 1px;
           background: rgba(255, 255, 255, 0.42);
           border-radius: 1px;
           pointer-events: none;

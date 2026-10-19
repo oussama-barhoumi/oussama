@@ -155,11 +155,12 @@ export default function HollowKnightCanvas({ style, isNavOpen = false, onHoverSt
 
   return (
     <div
+      className="hollow-knight-wrapper"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
       style={{
-        position: 'absolute',
+        position: 'fixed',
         top: 'clamp(14px, 2.2vh, 28px)',
         right: 'clamp(24px, 3.5vw, 48px)',
         width: 'clamp(160px, 15vw, 210px)',
@@ -167,78 +168,87 @@ export default function HollowKnightCanvas({ style, isNavOpen = false, onHoverSt
         zIndex: 30,
         cursor: 'pointer',
         pointerEvents: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        transform: clicked ? 'scale(1.12) rotate(5deg)' : hovered ? 'scale(1.05)' : 'scale(1)',
+        willChange: 'transform',
         ...style,
       }}
       title={isNavOpen ? 'Click to Sheathe Nail & Close Menu' : 'Click to Draw Nail & Open Navigation'}
     >
-      {/* Subtle crimson aura glow behind canvas */}
       <div
-        style={{
-          position: 'absolute',
-          inset: '12%',
-          borderRadius: '50%',
-          background: isNavOpen
-            ? 'radial-gradient(circle, rgba(255, 40, 40, 0.55) 0%, rgba(180, 10, 10, 0.25) 50%, transparent 75%)'
-            : 'radial-gradient(circle, rgba(240, 30, 30, 0.38) 0%, rgba(140, 10, 10, 0.15) 50%, transparent 75%)',
-          filter: 'blur(22px)',
-          opacity: hovered || isNavOpen ? 1 : 0.6,
-          transition: 'opacity 0.4s ease, transform 0.4s ease, background 0.4s ease',
-          transform: hovered || isNavOpen ? 'scale(1.25)' : 'scale(1)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Three.js Canvas */}
-      <Canvas
-        camera={{ position: [0, 0.1, 4.0], fov: 40 }}
-        gl={{
-          alpha: true,
-          antialias: true,
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.05,
-          outputColorSpace: THREE.SRGBColorSpace,
-        }}
+        className="hollow-knight-interactive"
         style={{
           width: '100%',
           height: '100%',
-          background: 'transparent',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          transform: clicked ? 'scale(1.12) rotate(5deg)' : hovered ? 'scale(1.05)' : 'scale(1)',
         }}
       >
-        {/* Pure studio ambient light to preserve true white & slate tones */}
-        <ambientLight intensity={1.1} color="#ffffff" />
+        {/* Subtle crimson aura glow behind canvas */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: '12%',
+            borderRadius: '50%',
+            background: isNavOpen
+              ? 'radial-gradient(circle, rgba(255, 40, 40, 0.55) 0%, rgba(180, 10, 10, 0.25) 50%, transparent 75%)'
+              : 'radial-gradient(circle, rgba(240, 30, 30, 0.38) 0%, rgba(140, 10, 10, 0.15) 50%, transparent 75%)',
+            filter: 'blur(22px)',
+            opacity: hovered || isNavOpen ? 1 : 0.6,
+            transition: 'opacity 0.4s ease, transform 0.4s ease, background 0.4s ease',
+            transform: hovered || isNavOpen ? 'scale(1.25)' : 'scale(1)',
+            pointerEvents: 'none',
+          }}
+        />
 
-        {/* Primary key light directly onto mask and horns */}
-        <directionalLight position={[4, 5, 5]} intensity={2.2} color="#ffffff" />
+        {/* Three.js Canvas */}
+        <Canvas
+          camera={{ position: [0, 0.1, 4.5], fov: 42 }}
+          gl={{
+            alpha: true,
+            antialias: true,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: 1.05,
+            outputColorSpace: THREE.SRGBColorSpace,
+          }}
+          style={{
+            width: '100%',
+            height: '100%',
+            background: 'transparent',
+          }}
+        >
+          {/* Pure studio ambient light to preserve true white & slate tones */}
+          <ambientLight intensity={1.1} color="#ffffff" />
 
-        {/* Secondary soft cool fill light from side */}
-        <directionalLight position={[-4, 3, 3]} intensity={1.1} color="#e6f0ff" />
+          {/* Primary key light directly onto mask and horns */}
+          <directionalLight position={[4, 5, 5]} intensity={2.2} color="#ffffff" />
 
-        {/* Back rim light to pop edges from dark background */}
-        <directionalLight position={[0, 4, -4]} intensity={1.4} color="#ffffff" />
+          {/* Secondary soft cool fill light from side */}
+          <directionalLight position={[-4, 3, 3]} intensity={1.1} color="#e6f0ff" />
 
-        {/* Subtle ground reflection */}
-        <directionalLight position={[0, -3, 2]} intensity={0.45} color="#d0d0d8" />
+          {/* Back rim light to pop edges from dark background */}
+          <directionalLight position={[0, 4, -4]} intensity={1.4} color="#ffffff" />
 
-        <Suspense fallback={null}>
-          <Float
-            speed={2.2}
-            rotationIntensity={0.15}
-            floatIntensity={0.3}
-            floatingRange={[-0.05, 0.05]}
-          >
-            <HollowKnightModel
-              hovered={hovered}
-              globalMouseRef={globalMouseRef}
-              isNavOpen={isNavOpen}
-            />
-          </Float>
-        </Suspense>
-      </Canvas>
+          {/* Subtle ground reflection */}
+          <directionalLight position={[0, -3, 2]} intensity={0.45} color="#d0d0d8" />
+
+          <Suspense fallback={null}>
+            <Float
+              speed={2.2}
+              rotationIntensity={0.15}
+              floatIntensity={0.3}
+              floatingRange={[-0.05, 0.05]}
+            >
+              <HollowKnightModel
+                hovered={hovered}
+                globalMouseRef={globalMouseRef}
+                isNavOpen={isNavOpen}
+              />
+            </Float>
+          </Suspense>
+        </Canvas>
+      </div>
     </div>
   );
 }

@@ -1,29 +1,39 @@
-import React, { useRef, useEffect, useLayoutEffect, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+if (typeof window !== 'undefined') {
+  window.gsap = gsap;
+}
+gsap.registerPlugin(ScrollTrigger);
 import LogoCanvas from '../3d/LogoCanvas';
 import HollowKnightCanvas from '../3d/HollowKnightCanvas';
 import HollowKnightNav from '../navigation/HollowKnightNav';
 import MarqueeText from './MarqueeText';
 import ScrambleTextCursorEffect from '../animations/ScrambleTextCursorEffect';
+import MaskReveal, { REPLAY_EVENT } from '../MaskReveal/MaskReveal';
+
+// ── Configurable About Me composition constants ──────────────────────────
+// 3D Hollow Knight model (hollow_knight.glb) transition to About Me
+export const ABOUT_KNIGHT_Y = '34vh';   // Centers 3D model vertically in About Me
+export const ABOUT_KNIGHT_SCALE = 1;    // Preserve the Home size during the About transition
 
 /**
  * Home
  *
  * ARCHITECTURE CHANGE:
  * Home is now pre-mounted under the Hero from the start of the portfolio
- * experience (once the preloader finishes). It accepts a `revealed` prop
- * that controls when its entrance mask animation plays.
+ * experience (once the preloader finishes). Its `revealed` prop is passed to
+ * MaskReveal, which controls the entrance mask animation.
  *
  * - `revealed=false` (default): masks are hidden via GSAP.set; no animation fires.
- * - `revealed=true`: playMaskAnimation() fires — same animation as before,
+ * - `revealed=true`: MaskReveal plays the same entrance animation as before,
  *   synchronized with the moment MeltReveal's paint finishes covering the Hero.
  *
  * This ensures Home is never "cold mounted" mid-transition. It already exists
  * underneath the Hero and is simply unveiled by the paint.
  */
 export default function Home({ revealed = false }) {
-  const leftMaskRef = useRef(null);
-  const rightMaskRef = useRef(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const navTimerRef = useRef(null);
 
@@ -39,91 +49,68 @@ export default function Home({ revealed = false }) {
     }, 200);
   }, []);
 
-  const playMaskAnimation = useCallback(() => {
-    if (!leftMaskRef.current || !rightMaskRef.current) return;
-
-    const leftEl = leftMaskRef.current;
-    const rightEl = rightMaskRef.current;
-
-    // Clear any active tweens
-    gsap.killTweensOf([leftEl, rightEl]);
-
-    // Initial state: off-screen on the left/right with 3D rotation Y
-    const offscreenDistance = Math.max(window.innerWidth * 0.95, 1200);
-
-    gsap.set(leftEl, {
-      x: -offscreenDistance,
-      rotationY: -180,
-      opacity: 0,
-      scale: 1.12,
-      transformOrigin: 'right center',
-    });
-
-    gsap.set(rightEl, {
-      x: offscreenDistance,
-      rotationY: 180,
-      opacity: 0,
-      scale: 1.12,
-      transformOrigin: 'left center',
-    });
-
-    const tl = gsap.timeline({
-      delay: 0.35,
-    });
-
-    tl.to(
-      leftEl,
-      {
-        x: 0,
-        rotationY: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 1.6,
-        ease: 'power3.out',
-      },
-      0
-    );
-
-    tl.to(
-      rightEl,
-      {
-        x: 0,
-        rotationY: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 1.6,
-        ease: 'power3.out',
-      },
-      0
-    );
-  }, []);
-
-  // ── Hide masks synchronously before the first paint ───────────────────────
-  // Ensures the mask elements are invisible while Home sits under the Hero.
-  // useLayoutEffect fires before the browser paints — no flash of visible masks.
-  useLayoutEffect(() => {
-    if (leftMaskRef.current && rightMaskRef.current) {
-      gsap.set([leftMaskRef.current, rightMaskRef.current], { opacity: 0 });
-    }
-  }, []);
-
-  // ── Fire entrance animation once the paint reveal completes ───────────────
+  // ── Master ScrollTrigger Timeline: Home → About Me ───────────────────
   useEffect(() => {
-    if (revealed) {
-      playMaskAnimation();
-    }
-  }, [revealed, playMaskAnimation]);
+    const ctx = gsap.context(() => {
+      const masterTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#new-section',
+          start: 'top top',
+          end: '+=140%',
+          scrub: 1,
+          pin: '.about-sticky-viewport',
+          invalidateOnRefresh: true,
+        },
+      });
+      // ── LAYER A: 3D Hollow Knight Model (hollow_knight.glb) Movement ──
+      // Smoothly glides from Home top-right corner to intentional About Me hero position.
+      // The 3D model remains visible throughout the transition and in About Me!
+      masterTl.to(
+        '.hollow-knight-interactive',
+        {
+          y: ABOUT_KNIGHT_Y,
+          scale: ABOUT_KNIGHT_SCALE,
+          ease: 'power1.inOut',
+          duration: 0.85,
+        },
+        0
+      );
 
-  // Dev shortcut: Press 'm' or 'M' to replay the mask animation anytime
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.key === 'm' || e.key === 'M') && !e.metaKey && !e.ctrlKey) {
-        playMaskAnimation();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playMaskAnimation]);
+      // ── LAYER C: Clean Typography Reveal ──────────────────────────────
+      // Progressive, sharp reveal: "ABOUT ME" tag -> "OUSsAMA" -> "BARHOUMI" -> statement
+      masterTl.to(
+        '.about-tag',
+        { opacity: 1, y: 0, duration: 0.15, ease: 'power2.out' },
+        0.35
+      );
+
+      masterTl.to(
+        '.about-name-first',
+        { opacity: 1, y: 0, duration: 0.20, ease: 'power2.out' },
+        0.45
+      );
+
+      masterTl.to(
+        '.about-name-last',
+        { opacity: 1, y: 0, duration: 0.20, ease: 'power2.out' },
+        0.58
+      );
+
+      masterTl.to(
+        '.about-statement',
+        { opacity: 1, y: 0, duration: 0.20, ease: 'power2.out' },
+        0.70
+      );
+
+      // ── LAYER D: Home Elements Clean Exit ─────────────────────────────
+      masterTl.to(
+        ['.home-marquee-wrap', '.home-roles-list', '.home-intro-left'],
+        { opacity: 0, y: -24, duration: 0.30, ease: 'power1.out' },
+        0.05
+      );
+    });
+    return () => ctx.revert();
+  }, []);
 
   return (
     <div
@@ -137,19 +124,11 @@ export default function Home({ revealed = false }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
       }}
     >
       <style>{`
-        @keyframes maskSubtleGlow {
-          0%, 100% {
-            filter: drop-shadow(0 0 10px rgba(225, 20, 20, 0.75)) drop-shadow(0 0 22px rgba(255, 30, 30, 0.45)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95));
-          }
-          50% {
-            filter: drop-shadow(0 0 16px rgba(255, 40, 40, 0.95)) drop-shadow(0 0 32px rgba(230, 20, 20, 0.65)) drop-shadow(0 4px 18px rgba(0, 0, 0, 1));
-          }
-        }
         .home-role-item:hover {
+          font-family: 'Comico', sans-serif !important;
           color: #ffffff !important;
           transform: translateX(-4px);
           text-shadow: 0 0 14px rgba(255, 60, 60, 0.7);
@@ -175,6 +154,7 @@ export default function Home({ revealed = false }) {
 
       {/* Top-left: Logo + ScrambleText Cursor Effect underneath */}
       <div
+        className="home-intro-left"
         style={{
           position: 'absolute',
           top: 'clamp(16px, 2.5vh, 32px)',
@@ -186,6 +166,7 @@ export default function Home({ revealed = false }) {
           gap: '8px',
           maxWidth: 'clamp(340px, 38vw, 600px)',
           pointerEvents: 'auto',
+          willChange: 'transform, opacity',
         }}
       >
         <div
@@ -230,10 +211,13 @@ export default function Home({ revealed = false }) {
       />
 
       {/* Infinite horizontal marquee — vertically centred */}
-      <MarqueeText />
+      <div className="home-marquee-wrap" style={{ width: '100%', willChange: 'transform, opacity' }}>
+        <MarqueeText />
+      </div>
 
-      {/* Subject.png + Face Masks container */}
+      {/* Subject.png portrait (stays in Home) */}
       <div
+        className="subject-container"
         style={{
           position: 'absolute',
           bottom: '-150px',
@@ -246,7 +230,7 @@ export default function Home({ revealed = false }) {
           pointerEvents: 'auto',
           cursor: 'pointer',
         }}
-        onClick={playMaskAnimation}
+        onClick={() => window.dispatchEvent(new Event(REPLAY_EVENT))}
         title="Click to replay mask animation"
       >
         <div
@@ -256,7 +240,6 @@ export default function Home({ revealed = false }) {
             lineHeight: 0,
           }}
         >
-          {/* Subject portrait */}
           <img
             src="/img/Subject.png"
             alt="Subject"
@@ -277,83 +260,14 @@ export default function Home({ revealed = false }) {
               pointerEvents: 'none',
             }}
           />
-
-          {/* 3D Perspective Container for Converging Face Masks (Massive Hero Scale) */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '3%',
-              left: '42%',
-              transform: 'translateX(-50%)',
-              width: '118%',
-              height: '88%',
-              pointerEvents: 'none',
-              perspective: '1400px',
-              transformStyle: 'preserve-3d',
-              zIndex: 7,
-            }}
-          >
-            {/* Left mask: face.masek1.png (duplicated & mirrored opposite direction) */}
-            <div
-              ref={leftMaskRef}
-              style={{
-                position: 'absolute',
-                top: 0,
-                right: '20%',
-                width: '65%',
-                height: '100%',
-                transformOrigin: '100% center',
-                transformStyle: 'preserve-3d',
-                willChange: 'transform, opacity',
-              }}
-            >
-              <img
-                src="/img/face.masek1.png"
-                alt="face masek 1"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  objectPosition: 'right center',
-                  animation: 'maskSubtleGlow 3s ease-in-out infinite',
-                  userSelect: 'none',
-                }}
-              />
-            </div>
-
-            {/* Right mask: face.masek.png */}
-            <div
-              ref={rightMaskRef}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: '35%',
-                width: '65%',
-                height: '100%',
-                transformOrigin: '8% center',
-                transformStyle: 'preserve-3d',
-                willChange: 'transform, opacity',
-              }}
-            >
-              <img
-                src="/img/face.masek.png"
-                alt="face masek"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  objectPosition: 'left center',
-                  animation: 'maskSubtleGlow 3s ease-in-out infinite',
-                  userSelect: 'none',
-                }}
-              />
-            </div>
-          </div>
         </div>
       </div>
 
+      <MaskReveal revealed={revealed} />
+
       {/* Bottom-right: Storyteller, UI/UX Designer, Fullstack Developer, AI & LLM Focus */}
       <div
+        className="home-roles-list"
         style={{
           position: 'absolute',
           bottom: 'clamp(80px, 15vh, 200px)',

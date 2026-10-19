@@ -1,1 +1,5 @@
 /* App.css intentionally empty — all styles managed via index.css and inline */
+.education-transition {
+    position: relative;
+    width: 100%;
+}

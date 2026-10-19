@@ -1,0 +1,929 @@
+/* =====================================================
+   FONTS
+===================================================== */
+
+@font-face {
+  font-family: 'Blazeberg';
+  src: url('/fonts/Blazeberg.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =====================================================
+   NEW SECTION
+===================================================== */
+
+.new-section {
+  position: relative;
+  width: 100%;
+  min-height: 520vh;
+
+  background: #040001;
+  color: #ffffff;
+
+  overflow: hidden;
+  z-index: 5;
+}
+
+
+/* =====================================================
+   STAGE
+===================================================== */
+
+.new-section__stage {
+  position: relative;
+
+  width: 100%;
+  height: 100vh;
+
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  isolation: isolate;
+
+  background:
+    radial-gradient(ellipse at 50% 50%,
+      rgba(180, 10, 10, 0.28) 0%,
+      rgba(80, 4, 4, 0.12) 45%,
+      transparent 75%);
+}
+
+
+/* =====================================================
+   BACKGROUND
+===================================================== */
+
+.new-section__background {
+  position: absolute;
+  inset: 0;
+
+  z-index: 0;
+
+  background:
+    radial-gradient(ellipse at center,
+      rgba(160, 15, 15, 0.16) 0%,
+      rgba(50, 0, 0, 0.08) 45%,
+      transparent 75%);
+
+  pointer-events: none;
+}
+
+
+/* =====================================================
+   ORIGINAL TEXT
+===================================================== */
+
+.new-section__content {
+  position: relative;
+
+  z-index: 20;
+
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  pointer-events: none;
+
+  transform: translateY(-5vh);
+}
+
+
+/* =====================================================
+   HEADING
+===================================================== */
+
+.new-section__heading {
+  position: relative;
+
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  font-family: 'Blazeberg', cursive;
+  font-weight: normal;
+
+  font-size:
+    clamp(3.8rem, 8vw, 9rem);
+
+  line-height: 1.05;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+}
+
+
+/* =====================================================
+   NAME
+===================================================== */
+
+.new-section__name {
+  display: block;
+
+  position: relative;
+
+  white-space: nowrap;
+
+  will-change: transform, opacity;
+
+  background: linear-gradient(135deg, #ff1a1a 0%, #cc0000 40%, #1a0000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+
+/* =====================================================
+   STATEMENT
+===================================================== */
+
+.new-section__statement {
+  position: absolute;
+
+  top: 220%;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  margin: 0;
+
+  width: max-content;
+
+  font-family:
+    'Monsieur La Doulaise',
+    cursive;
+
+  font-size:
+    clamp(2.5rem, 3vw, 3.5rem);
+
+  font-weight: 400;
+
+  letter-spacing: 0.08em;
+
+  line-height: 1.5;
+
+  color: rgba(182, 23, 23, 0.9);
+
+  white-space: nowrap;
+
+  will-change: transform, opacity;
+}
+
+
+/* =====================================================
+   GIF FRAME
+===================================================== */
+
+.new-section__media-frame {
+  position: absolute;
+
+  width: 100vw;
+  height: 100vh;
+
+  left: 50%;
+  top: 50%;
+
+  transform:
+    translate(-50%, -50%);
+
+  overflow: hidden;
+
+  z-index: 100;
+
+  background: #5a0f12;
+
+  border-radius: 28px;
+
+  transform-origin: center center;
+
+  will-change:
+    transform,
+    border-radius,
+    opacity;
+
+  pointer-events: none;
+}
+
+
+/* =====================================================
+   GIF
+===================================================== */
+
+.new-section__media {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  pointer-events: none;
+
+  user-select: none;
+
+  -webkit-user-drag: none;
+}
+
+
+/* =====================================================
+   INFORMATION LAYER
+===================================================== */
+
+.new-section__info {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 200;
+
+  pointer-events: none;
+}
+
+
+/* =====================================================
+   GLOBAL INFORMATION BLOCK
+===================================================== */
+
+.new-section__info-block {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: min(1100px, 88vw);
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  color: #ffffff;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+/* =====================================================
+   ABOUT
+===================================================== */
+
+.new-section__about {
+  --about-x: 0px;
+  --about-y: 0px;
+
+  left: 50%;
+  top: 50%;
+
+  transform:
+    translate(calc(-50% + var(--about-x)),
+      calc(-50% + var(--about-y)));
+
+  text-align: center;
+}
+
+.new-section__about h2 {
+  margin: 0;
+
+  font-family: 'Blazeberg', cursive;
+  font-weight: normal;
+
+  font-size:
+    clamp(3rem, 7vw, 8rem);
+
+  line-height: 1.05;
+
+  letter-spacing: 0.02em;
+}
+
+.new-section__about p {
+  width: min(620px, 85vw);
+
+  margin: 40px auto 0;
+
+  font-family: 'Satoshi', sans-serif;
+
+  font-size:
+    clamp(1rem, 1.5vw, 1.35rem);
+
+  line-height: 1.7;
+
+  color: rgba(255, 255, 255, 0.72);
+}
+
+
+/* =====================================================
+   EDUCATION
+===================================================== */
+
+.new-section__education {
+
+  /*
+  =====================================================
+  EDUCATION POSITION CONTROL
+  =====================================================
+
+  Change these values:
+
+  X:
+  +200px  → right
+  -200px  → left
+
+  Y:
+  +100px  → down
+  -100px  → up
+  */
+
+  --education-x: 0px;
+  --education-y: 0px;
+
+  /*
+  Width control
+  */
+
+  --education-width: 900px;
+
+  /*
+  Scale control
+  */
+
+  --education-scale: 1;
+
+  transform:
+    translate(calc(-50% + var(--education-x)),
+      calc(-50% + var(--education-y))) scale(var(--education-scale));
+
+  width:
+    min(var(--education-width),
+      88vw);
+
+  text-align: center;
+}
+
+
+/* =====================================================
+   EDUCATION TITLE (ABOUT ME)
+===================================================== */
+
+.new-section__education .new-section__eyebrow {
+  position: absolute;
+  top: calc(-50vh + 50% + clamp(36px, 7vh, 64px));
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+  text-align: center;
+  margin: 0;
+  white-space: nowrap;
+  letter-spacing: 0.3em;
+  z-index: 10;
+}
+
+
+/* =====================================================
+   EDUCATION ITEM
+===================================================== */
+
+.education-item {
+  display: grid;
+
+  grid-template-columns:
+    70px 1fr;
+
+  gap: 25px;
+
+  padding: 28px 0;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.18);
+
+  text-align: left;
+}
+
+
+/* =====================================================
+   EDUCATION NUMBER
+===================================================== */
+
+.education-number {
+  font-family:
+    'Panchang',
+    sans-serif;
+
+  font-size: 0.7rem;
+
+  color:
+    rgba(255, 255, 255, 0.45);
+}
+
+
+/* =====================================================
+   EDUCATION HEADING
+===================================================== */
+
+.education-item h3 {
+  margin: 0;
+
+  font-family:
+    'Panchang',
+    sans-serif;
+
+  font-size:
+    clamp(1rem, 1.6vw, 1.5rem);
+
+  letter-spacing: 0.02em;
+}
+
+
+/* =====================================================
+   EDUCATION DESCRIPTION
+===================================================== */
+
+.education-item p {
+  margin: 12px 0 0;
+
+  max-width: 650px;
+
+  font-family:
+    'Satoshi',
+    sans-serif;
+
+  font-size:
+    clamp(0.9rem, 1.2vw, 1.05rem);
+
+  line-height: 1.6;
+
+  color:
+    rgba(255, 255, 255, 0.6);
+}
+
+
+/* =====================================================
+   CURRENT FOCUS
+===================================================== */
+
+.new-section__focus {
+
+  /*
+    POSITION CONTROL
+  */
+
+  --focus-x: 0px;
+  --focus-y: 0px;
+
+  transform:
+    translate(calc(-50% + var(--focus-x)),
+      calc(-50% + var(--focus-y)));
+
+  text-align: center;
+}
+
+.new-section__focus h2 {
+  margin: 0;
+
+  font-family:
+    'Blazeberg',
+    cursive;
+  font-weight: normal;
+
+  font-size:
+    clamp(5rem, 14vw, 14rem);
+
+  line-height: 0.78;
+
+  letter-spacing: -0.06em;
+}
+
+.new-section__focus p {
+  width: min(620px, 85vw);
+
+  margin: 50px auto 0;
+
+  font-family:
+    'Satoshi',
+    sans-serif;
+
+  font-size:
+    clamp(1rem, 1.4vw, 1.3rem);
+
+  line-height: 1.7;
+
+  color:
+    rgba(255, 255, 255, 0.65);
+}
+
+
+/* =====================================================
+   SKILLS
+===================================================== */
+
+.new-section__skills {
+
+  --skills-x: 0px;
+  --skills-y: 0px;
+
+  transform:
+    translate(calc(-50% + var(--skills-x)),
+      calc(-50% + var(--skills-y)));
+
+  text-align: left;
+
+  /* Allow pointer events so magnetic hover fires */
+  pointer-events: auto;
+
+  /* Fill more of the viewport */
+  width: min(1560px, 96vw);
+}
+
+.new-section__skills .new-section__eyebrow {
+  text-align: center;
+}
+
+
+/* =====================================================
+   SKILL CARDS ROW
+===================================================== */
+
+.sc-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+/* =====================================================
+   SINGLE CARD
+===================================================== */
+
+.sc-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 44px 36px 36px;
+  min-height: 460px;
+  background: #040001;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: default;
+  overflow: hidden;
+  will-change: transform;
+  transition: background 0.35s ease;
+}
+
+.sc-card:last-child {
+  border-right: none;
+}
+
+.sc-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 60%,
+    rgba(197, 83, 71, 0.06) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.sc-card:hover::before {
+  opacity: 1;
+}
+
+
+/* =====================================================
+   TOP BAR
+===================================================== */
+
+.sc-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: auto;
+}
+
+.sc-index {
+  font-family: 'Panchang', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.sc-category {
+  font-family: 'Panchang', sans-serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.25);
+  text-align: right;
+}
+
+
+/* =====================================================
+   ICON WRAPPER  (magnetic target)
+===================================================== */
+
+.sc-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 36px 0;
+  will-change: transform;
+}
+
+.sc-icon {
+  width: 110px;
+  height: 110px;
+  color: rgba(255, 255, 255, 0.82);
+  display: block;
+  overflow: visible;
+}
+
+
+/* =====================================================
+   BOTTOM CONTENT
+===================================================== */
+
+.sc-bottom {
+  position: relative;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sc-title {
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Panchang', sans-serif;
+  font-size: clamp(1.3rem, 1.8vw, 2rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  color: #ffffff;
+}
+
+.sc-desc {
+  margin: 0;
+  font-family: 'Satoshi', sans-serif;
+  font-size: clamp(0.78rem, 0.95vw, 0.92rem);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 240px;
+}
+
+.sc-arrow {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 1.1rem;
+  color: rgba(197, 83, 71, 0.7);
+  transition: transform 0.3s ease, color 0.3s ease;
+  line-height: 1;
+}
+
+.sc-card:hover .sc-arrow {
+  transform: translate(3px, -3px);
+  color: rgba(197, 83, 71, 1);
+}
+
+
+/* =====================================================
+   EYEBROW
+===================================================== */
+
+.new-section__eyebrow {
+  display: block;
+
+  margin-bottom: 28px;
+
+  font-family:
+    'Blazeberg',
+    cursive;
+  font-weight: normal;
+
+  font-size: 0.7rem;
+
+  letter-spacing: 0.25em;
+
+  color:
+    rgba(255, 255, 255, 0.55);
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 768px) {
+
+  .new-section {
+    min-height: 600vh;
+  }
+
+  .new-section__heading {
+    font-size:
+      clamp(2.3rem, 11vw, 4rem);
+  }
+
+  .new-section__statement {
+    font-size:
+      clamp(1.8rem, 7vw, 2.8rem);
+
+    letter-spacing: 0.04em;
+  }
+
+  .new-section__content {
+    transform:
+      translateY(-3vh);
+  }
+
+  /* Education mobile position */
+
+  .new-section__education {
+    --education-x: 0px;
+    --education-y: 0px;
+
+    --education-width: 90vw;
+
+    --education-scale: 1;
+  }
+
+  .education-item {
+    grid-template-columns:
+      40px 1fr;
+
+    gap: 15px;
+
+    padding: 22px 0;
+  }
+
+  .sc-row {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-card {
+    min-height: 260px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .sc-card:last-child {
+    border-bottom: none;
+  }
+
+  .new-section__focus h2 {
+    font-size:
+      clamp(4rem, 20vw, 8rem);
+  }
+}
+
+/* =====================================================
+   TABLET  — 2 × 2 grid
+===================================================== */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sc-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sc-card:nth-child(2) {
+    border-right: none;
+  }
+
+  .sc-card:nth-child(1),
+  .sc-card:nth-child(2) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* =====================================================
+   EDUCATION VERTICAL SCROLL STAGE
+===================================================== */
+
+.education-stage {
+  position: relative;
+
+  width: 100%;
+  height: 70vh;
+
+  overflow: hidden;
+}
+
+
+/* =====================================================
+   EACH EDUCATION ITEM
+===================================================== */
+
+.education-stage .education-item {
+  position: absolute;
+
+  left: 0;
+  top: 50%;
+
+  width: 100%;
+
+  transform: translateY(100vh);
+
+  opacity: 0;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+/* =====================================================
+   KEEP ITEMS ABOVE EACH OTHER
+===================================================== */
+
+.education-stage .education-item:nth-child(1) {
+  z-index: 3;
+}
+
+.education-stage .education-item:nth-child(2) {
+  z-index: 2;
+}
+
+.education-stage .education-item:nth-child(3) {
+  z-index: 1;
+}
+
+.new-section__education {
+  --education-x: 0px;
+  --education-y: 0px;
+  --education-width: 900px;
+  --education-scale: 1;
+
+  width: min(var(--education-width), 88vw);
+
+  left: 50%;
+  top: 50%;
+
+  transform:
+    translate(calc(-50% + var(--education-x)),
+      calc(-50% + var(--education-y))) scale(var(--education-scale));
+
+  opacity: 0;
+}
+
+.education-motion {
+  width: 100%;
+}
+
+.education-stage {
+  position: relative;
+  width: 100%;
+}
+
+.education-item {
+  display: grid;
+
+  grid-template-columns: 70px 1fr;
+
+  gap: 25px;
+
+  padding: 28px 0;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.18);
+
+  text-align: left;
+}
+
+.education-stage {
+  position: relative;
+  width: 100%;
+  height: 360px;
+}
+
+.education-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  transform: translateY(110vh);
+  will-change: transform, opacity;
+}
