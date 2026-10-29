@@ -1,10 +1,11 @@
 import React, { useLayoutEffect, useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Draggable } from 'gsap/Draggable';
 
 import './NewSection.css';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Draggable);
 
 /* ─── Card data ─────────────────────────────────────────────────────────── */
 const SKILL_CARDS = [
@@ -87,6 +88,37 @@ const SKILL_CARDS = [
   },
 ];
 
+/* ─── Seamless loop builder (adapted from GreenSock demo) ───────────────── */
+function buildSeamlessLoop(items, spacing, animateFunc) {
+  const overlap    = Math.ceil(1 / spacing);
+  const startTime  = items.length * spacing + 0.5;
+  const loopTime   = (items.length + overlap) * spacing + 1;
+  const rawSeq     = gsap.timeline({ paused: true });
+  const seamless   = gsap.timeline({
+    paused: true,
+    repeat: -1,
+    onRepeat() {
+      this._time === this._dur && (this._tTime += this._dur - 0.01);
+    },
+  });
+  const total = items.length + overlap * 2;
+
+  for (let i = 0; i < total; i++) {
+    const index = i % items.length;
+    const time  = i * spacing;
+    rawSeq.add(animateFunc(items[index]), time);
+  }
+
+  rawSeq.time(startTime);
+  seamless
+    .to(rawSeq, { time: loopTime, duration: loopTime - startTime, ease: 'none' })
+    .fromTo(rawSeq,
+      { time: overlap * spacing + 1 },
+      { time: startTime, duration: startTime - (overlap * spacing + 1), immediateRender: false, ease: 'none' }
+    );
+  return seamless;
+}
+
 const WEDDING_GIF =
   '/gif/From Klickpin.com- Wedding DIY Ideas 71 Ideas to Copy-pin-id-434386326559649685.gif';
 
@@ -116,8 +148,7 @@ export default function NewSection() {
   const educationItem2Ref = useRef(null);
   const educationItem3Ref = useRef(null);
 
-  // Magnetic card icon refs — one per card
-  const iconRefs = useRef([]);
+
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -558,67 +589,87 @@ export default function NewSection() {
     return () => ctx.revert();
   }, []);
 
-  /* ─── Magnetic icon interaction ──────────────────────────────────────────── */
+  /* ─── Seamless card loop ──────────────────────────────────────────────── */
   useEffect(() => {
-    const cards = skillsRef.current
-      ? Array.from(skillsRef.current.querySelectorAll('.sc-card'))
-      : [];
+    if (!skillsRef.current) return;
+    const container = skillsRef.current;
+    const cardEls   = Array.from(container.querySelectorAll('.wid-card'));
+    if (!cardEls.length) return;
 
-    if (!cards.length) return;
+    const spacing = 0.18;
+    const snap    = gsap.utils.snap(spacing);
+    const wrapT   = gsap.utils.wrap;
 
-    const cleanups = [];
+    // Initial state — all cards off-screen right, invisible
+    gsap.set(cardEls, { xPercent: 400, opacity: 0, scale: 0 });
 
-    cards.forEach((card, i) => {
-      const icon = iconRefs.current[i];
-      if (!icon) return;
+    const animateFunc = (el) => {
+      const tl = gsap.timeline();
+      tl.fromTo(el,
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, zIndex: 100, duration: 0.5, yoyo: true, repeat: 1, ease: 'power1.in', immediateRender: false }
+      ).fromTo(el,
+        { xPercent: 400 },
+        { xPercent: -400, duration: 1, ease: 'none', immediateRender: false },
+        0
+      );
+      return tl;
+    };
 
-      // quickTo setters — x, y, rotate, scale
-      const xTo    = gsap.quickTo(icon, 'x',      { duration: 0.55, ease: 'power3.out' });
-      const yTo    = gsap.quickTo(icon, 'y',      { duration: 0.55, ease: 'power3.out' });
-      const rTo    = gsap.quickTo(icon, 'rotate', { duration: 0.65, ease: 'power3.out' });
-      const sTo    = gsap.quickTo(icon, 'scale',  { duration: 0.45, ease: 'power3.out' });
+    const loop = buildSeamlessLoop(cardEls, spacing, animateFunc);
+    const dur  = loop.duration();
+    const wrap = (v) => wrapT(0, dur)(v);
 
-      // Subtle card shift
-      const cxTo = gsap.quickTo(card, 'x', { duration: 0.8, ease: 'power3.out' });
-      const cyTo = gsap.quickTo(card, 'y', { duration: 0.8, ease: 'power3.out' });
+    let offset   = 0;
+    let dragging = false;
 
-      const onMove = (e) => {
-        const rect   = card.getBoundingClientRect();
-        const cx     = rect.left + rect.width  / 2;
-        const cy     = rect.top  + rect.height / 2;
-        const dx     = e.clientX - cx;
-        const dy     = e.clientY - cy;
-
-        // Icon: stronger pull (max ±22px)
-        const iconStrength = 0.38;
-        xTo(dx * iconStrength);
-        yTo(dy * iconStrength);
-        rTo(dx * 0.045);
-        sTo(1.08);
-
-        // Card: barely moves (max ~4px)
-        const cardStrength = 0.06;
-        cxTo(dx * cardStrength);
-        cyTo(dy * cardStrength);
-      };
-
-      const onLeave = () => {
-        xTo(0); yTo(0); rTo(0); sTo(1);
-        cxTo(0); cyTo(0);
-      };
-
-      card.addEventListener('mousemove', onMove);
-      card.addEventListener('mouseleave', onLeave);
-
-      cleanups.push(() => {
-        card.removeEventListener('mousemove', onMove);
-        card.removeEventListener('mouseleave', onLeave);
-        gsap.set(icon, { x: 0, y: 0, rotate: 0, scale: 1 });
-        gsap.set(card, { x: 0, y: 0 });
+    // Smooth snap-to helper
+    const gotoOffset = (target) => {
+      const snapped = snap(target);
+      gsap.to({ v: offset }, {
+        v: snapped,
+        duration: 0.55,
+        ease: 'power3',
+        onUpdate() { offset = this.targets()[0].v; loop.time(wrap(offset)); },
       });
+    };
+
+    // Auto-advance via ticker (~1 card every 2.5 s)
+    const tick = (_t, dt) => {
+      if (dragging) return;
+      offset += dt * 0.000072;
+      loop.time(wrap(offset));
+    };
+    gsap.ticker.add(tick);
+
+    // Prev / Next buttons
+    const nextBtn = container.querySelector('.wid-next');
+    const prevBtn = container.querySelector('.wid-prev');
+    const onNext  = () => gotoOffset(offset + spacing);
+    const onPrev  = () => gotoOffset(offset - spacing);
+    nextBtn?.addEventListener('click', onNext);
+    prevBtn?.addEventListener('click', onPrev);
+
+    // Draggable — drag the invisible proxy, trigger on the card list
+    const proxy = container.querySelector('.wid-drag-proxy');
+    const [drg] = Draggable.create(proxy, {
+      type: 'x',
+      trigger: container.querySelector('.wid-cards-list'),
+      onPress() { dragging = true; this._startOffset = offset; },
+      onDrag()  {
+        offset = this._startOffset + (this.startX - this.x) * 0.0012;
+        loop.time(wrap(offset));
+      },
+      onDragEnd() { dragging = false; gotoOffset(offset); },
     });
 
-    return () => cleanups.forEach(fn => fn());
+    return () => {
+      gsap.ticker.remove(tick);
+      loop.kill();
+      drg?.kill();
+      nextBtn?.removeEventListener('click', onNext);
+      prevBtn?.removeEventListener('click', onPrev);
+    };
   }, []);
 
   return (
@@ -830,40 +881,53 @@ export default function NewSection() {
               WHAT I DO
             </span>
 
-            <div className="sc-row">
-              {SKILL_CARDS.map((card, i) => (
-                <div key={card.index} className="sc-card">
+            {/* ── Carousel stage ── */}
+            <div className="wid-stage">
+              <ul className="wid-cards-list">
+                {SKILL_CARDS.map((card) => (
+                  <li key={card.index} className="wid-card">
 
-                  {/* ── Top bar ── */}
-                  <div className="sc-top">
-                    <span className="sc-index">/ {card.index}</span>
-                    <span className="sc-category">{card.category}</span>
-                  </div>
+                    <div className="wid-card-top">
+                      <span className="wid-card-index">/ {card.index}</span>
+                      <span className="wid-card-category">{card.category}</span>
+                    </div>
 
-                  {/* ── Icon (magnetic target) ── */}
-                  <div
-                    className="sc-icon-wrap"
-                    ref={el => { iconRefs.current[i] = el; }}
-                  >
-                    {card.icon}
-                  </div>
+                    <div className="wid-card-icon">
+                      {card.icon}
+                    </div>
 
-                  {/* ── Bottom content ── */}
-                  <div className="sc-bottom">
-                    <h3 className="sc-title">
-                      {card.title.map((line, li) => (
-                        <span key={li}>{line}</span>
-                      ))}
-                    </h3>
+                    <div className="wid-card-bottom">
+                      <h3 className="wid-card-title">
+                        {card.title.map((line, li) => (
+                          <span key={li}>{line}</span>
+                        ))}
+                      </h3>
+                      <p className="wid-card-desc">{card.description}</p>
+                      <span className="wid-card-arrow" aria-hidden="true">↗</span>
+                    </div>
 
-                    <p className="sc-desc">{card.description}</p>
+                  </li>
+                ))}
+              </ul>
 
-                    <span className="sc-arrow" aria-hidden="true">↗</span>
-                  </div>
-
-                </div>
-              ))}
+              {/* invisible drag proxy */}
+              <div className="wid-drag-proxy" />
             </div>
+
+            {/* ── Prev / Next ── */}
+            <div className="wid-nav">
+              <button className="wid-btn wid-prev" aria-label="Previous card">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M11 3.5L5.5 9L11 14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button className="wid-btn wid-next" aria-label="Next card">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M7 3.5L12.5 9L7 14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
           </article>
 
         </div>

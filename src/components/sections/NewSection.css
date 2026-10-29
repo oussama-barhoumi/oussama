@@ -534,179 +534,212 @@
 
 
 /* =====================================================
-   SKILLS
+   SKILLS  —  full-stage flex container
+   GSAP animates y: 100vh → y: 0 (slides up from below).
+   Flexbox then centers the carousel content perfectly.
 ===================================================== */
 
 .new-section__skills {
+  /* override .new-section__info-block left/top/width */
+  position: absolute;
+  inset: 0;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
 
-  --skills-x: 0px;
-  --skills-y: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
 
-  transform:
-    translate(calc(-50% + var(--skills-x)),
-      calc(-50% + var(--skills-y)));
+  text-align: center;
 
-  text-align: left;
-
-  /* Allow pointer events so magnetic hover fires */
-  pointer-events: auto;
-
-  /* Fill more of the viewport */
-  width: min(1560px, 96vw);
+  /* pointer-events handled by children */
+  pointer-events: none;
 }
 
 .new-section__skills .new-section__eyebrow {
   text-align: center;
+  margin-bottom: 0;
 }
 
 
 /* =====================================================
-   SKILL CARDS ROW
+   WID  —  seamless carousel
 ===================================================== */
 
-.sc-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-
-/* =====================================================
-   SINGLE CARD
-===================================================== */
-
-.sc-card {
+/* Stage: anchor point for all stacked cards */
+.wid-stage {
   position: relative;
+  width: 100%;
+  height: 22rem;   /* matches card height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible; /* let cards slide in/out from edges */
+  pointer-events: auto;
+}
+
+/* The <ul> is the shared anchor; all <li> stack on top of each other */
+.wid-cards-list {
+  position: relative;
+  width: 15rem;
+  height: 22rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  cursor: grab;
+}
+
+.wid-cards-list:active {
+  cursor: grabbing;
+}
+
+/* Every card is absolutely placed at 0,0; GSAP drives xPercent */
+.wid-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 15rem;
+  height: 22rem;
+
   display: flex;
   flex-direction: column;
-  padding: 44px 36px 36px;
-  min-height: 460px;
+  padding: 24px 22px 20px;
+
   background: #040001;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: default;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+
   overflow: hidden;
-  will-change: transform;
-  transition: background 0.35s ease;
+  will-change: transform, opacity;
 }
 
-.sc-card:last-child {
-  border-right: none;
-}
-
-.sc-card::before {
+/* Subtle red inner glow */
+.wid-card::after {
   content: '';
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    ellipse at 50% 60%,
-    rgba(197, 83, 71, 0.06) 0%,
+    ellipse at 50% 65%,
+    rgba(197, 83, 71, 0.08) 0%,
     transparent 70%
   );
-  opacity: 0;
-  transition: opacity 0.45s ease;
   pointer-events: none;
 }
 
-.sc-card:hover::before {
-  opacity: 1;
-}
-
-
-/* =====================================================
-   TOP BAR
-===================================================== */
-
-.sc-top {
+/* ── Card top bar ── */
+.wid-card-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: auto;
+  flex-shrink: 0;
 }
 
-.sc-index {
+.wid-card-index {
   font-family: 'Panchang', sans-serif;
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
   color: rgba(255, 255, 255, 0.35);
 }
 
-.sc-category {
+.wid-card-category {
   font-family: 'Panchang', sans-serif;
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   letter-spacing: 0.18em;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.2);
   text-align: right;
 }
 
-
-/* =====================================================
-   ICON WRAPPER  (magnetic target)
-===================================================== */
-
-.sc-icon-wrap {
+/* ── Icon area ── */
+.wid-card-icon {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
-  padding: 36px 0;
-  will-change: transform;
 }
 
 .sc-icon {
-  width: 110px;
-  height: 110px;
+  width: 90px;
+  height: 90px;
   color: rgba(255, 255, 255, 0.82);
   display: block;
   overflow: visible;
 }
 
-
-/* =====================================================
-   BOTTOM CONTENT
-===================================================== */
-
-.sc-bottom {
+/* ── Bottom text ── */
+.wid-card-bottom {
   position: relative;
-  margin-top: auto;
-  padding-top: 20px;
+  flex-shrink: 0;
+  padding-top: 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
 }
 
-.sc-title {
-  margin: 0 0 12px;
+.wid-card-title {
+  margin: 0 0 6px;
   display: flex;
   flex-direction: column;
   font-family: 'Panchang', sans-serif;
-  font-size: clamp(1.3rem, 1.8vw, 2rem);
+  font-size: clamp(1rem, 1.4vw, 1.4rem);
   font-weight: 600;
   letter-spacing: 0.04em;
   line-height: 1.1;
   color: #ffffff;
 }
 
-.sc-desc {
+.wid-card-desc {
   margin: 0;
   font-family: 'Satoshi', sans-serif;
-  font-size: clamp(0.78rem, 0.95vw, 0.92rem);
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.45);
-  max-width: 240px;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.42);
 }
 
-.sc-arrow {
+.wid-card-arrow {
   position: absolute;
   bottom: 0;
   right: 0;
-  font-size: 1.1rem;
-  color: rgba(197, 83, 71, 0.7);
-  transition: transform 0.3s ease, color 0.3s ease;
+  font-size: 0.95rem;
+  color: rgba(197, 83, 71, 0.65);
   line-height: 1;
 }
 
-.sc-card:hover .sc-arrow {
-  transform: translate(3px, -3px);
-  color: rgba(197, 83, 71, 1);
+/* ── Invisible drag proxy ── */
+.wid-drag-proxy {
+  visibility: hidden;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+}
+
+/* ── Navigation buttons ── */
+.wid-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.wid-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.wid-btn:hover {
+  background: rgba(197, 83, 71, 0.18);
+  border-color: rgba(197, 83, 71, 0.45);
+  color: #ffffff;
 }
 
 
@@ -780,18 +813,15 @@
     padding: 22px 0;
   }
 
-  .sc-row {
-    grid-template-columns: 1fr;
+  /* carousel mobile sizing */
+  .wid-stage {
+    height: 20rem;
   }
 
-  .sc-card {
-    min-height: 260px;
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .sc-card:last-child {
-    border-bottom: none;
+  .wid-cards-list,
+  .wid-card {
+    width: 13rem;
+    height: 20rem;
   }
 
   .new-section__focus h2 {
